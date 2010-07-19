@@ -1,0 +1,46 @@
+#!/usr/bin/env python
+
+#
+# Documentation
+#
+
+#
+# Imports
+#
+
+# System Imports
+import argparse
+import logging
+
+# Local Imports
+from mfgames.creole.docbook import setup_creole_to_docbook
+
+#
+# Constants
+#
+
+LOG_FORMAT = "%(asctime)-15s %(message)s"
+
+#
+# Logging
+#
+
+# Set up the logging to use a common format.
+logging.basicConfig(format=LOG_FORMAT, level=logging.DEBUG)
+
+#
+# Argument Parsing
+#
+
+# Set up the primary parser.
+parser = argparse.ArgumentParser(
+    description='Manipulate and convert Creole documents.')
+
+# Setup the secondary parsers.
+subparsers = parser.add_subparsers()
+setup_creole_to_docbook(subparsers)
+
+# Process the arguments given. Then call the 'function' parameter
+# which is set as a default to each of the subparsers.
+args = parser.parse_args()
+results = args.function(args)

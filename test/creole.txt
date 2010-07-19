@@ -1,0 +1,23 @@
+=
+
+This is a section of text with a "fancy quote" in the middle of it. It
+is also multiple lines and parses into a single paragraph.
+
+== Heading 2a
+
+This is a section of text with a "fancy quote" in the middle of it. It
+is also multiple lines and parses into a single paragraph.
+
+== Heading 2b
+
+This is a section of text with a "fancy quote" in the middle of it. It
+is also multiple lines and parses into a single paragraph.
+
+===
+
+Paragraph
+
+==
+
+This is a section of text with a "fancy quote" in the middle of it. It
+is also multiple lines and parses into a single paragraph.
