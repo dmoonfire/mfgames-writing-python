@@ -67,6 +67,19 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = re.sub(r'&#8220;', '<quote>', contents)
         contents = re.sub(r'&#8221;', '</quote>', contents)
 
+        # Normalize the whitespace and trim the leading spaces.
+        contents = string.replace(contents, '\n', ' ')
+        contents = string.replace(contents, '\r', ' ')
+        contents = string.replace(contents, '\t', ' ')
+        contents = re.sub(r'\s+', ' ', contents, re.MULTILINE)
+        
+        # Convert backticks into foreignphrases.
+        if args.backticks:
+            contents = re.sub(
+                r'`(.*?)`',
+                r'<foreignphrase>\1</foreignphrase>',
+                contents)
+
         # If we are parsing languages, then convert the language tags
         # (2-3 character tags after a quote) into xml:lang elements.
         if args.languages:
@@ -74,14 +87,11 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
                 r'<quote>(\w{2,3})\s*:\s*',
                 r'<quote xml:lang="\1">',
                 contents)
+            contents = re.sub(
+                r'<foreignphrase>(\w{2,3})\s*:\s*',
+                r'<foreignphrase xml:lang="\1">',
+                contents)
 
-        # Normalize the whitespace and trim the leading spaces.
-        contents = string.replace(contents, '\n', ' ')
-        contents = string.replace(contents, '\r', ' ')
-        contents = string.replace(contents, '\t', ' ')
-        contents = re.sub(r'\s+', ' ', contents, re.MULTILINE)
-        contents = string.replace(contents, '> <', '><')
-        
         # Wrap the headings into DocBook sections. We need to first
         # convert the empty elements ("<h2/>") into pairs ("<h2></h2>")
         # because of how this parser works. Then, we go through every
@@ -109,7 +119,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 	    '<article ' + namespaces + ' version="5.0">',
 	    contents)
         contents = '<?xml version="1.0" encoding="UTF-8"?>' + contents
-    
+
+        # Trim the space between the tags.
+        contents = string.replace(contents, '> <', '><')
+
         # Write the contents to the output file.
         output = open(output_filename, 'w')
         output.write(contents)
@@ -124,6 +137,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         super(CreoleDocbookConvertProcess, self).setup_arguments(parser)
 
         # Add the Creole-specific options.
+        parser.add_argument(
+            '--backticks',
+            action='store_true',
+            help='Converts backticks (`phrase`) into foreigh phrases.')
         parser.add_argument(
             '--languages',
             action='store_true',
