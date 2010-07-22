@@ -44,6 +44,7 @@ class DocbookCreoleParser(BaseParser):
 
 class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     help = 'Converts Creole files into DocBook 5.'
+    log = logging.getLogger('docbook')
 
     def get_extension(self):
         return "xml"
@@ -130,6 +131,12 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             [ 'h1' ])
         contents = self.wrap_sections(contents, "article", 'h1',
             [ ])
+
+        # After we wrap the sections, we can process the metadata if
+        # requested. These are encoded as itemized lists right after
+        # the <info> tags.
+        if args.metadata:
+            self.process_metadata(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
@@ -142,6 +149,9 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 	    contents)
         contents = '<?xml version="1.0" encoding="UTF-8"?>' + contents
 
+        # Remove the info tags, if we have blanks.
+        contents = string.replace(contents, '<info></info>', '')
+
         # Trim the space between the tags.
         contents = string.replace(contents, '> <', '><')
 
@@ -149,6 +159,14 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         output = open(output_filename, 'w')
         output.write(contents)
         output.close()
+
+    def process_metadata(self, contents):
+        """
+        Parses itemized lists right after the <info> tag and generates
+        the appropriate metadata within the info tag.
+        """
+
+        self.log.info('Processing metadata')
     
     def setup_arguments(self, parser):
         """
@@ -167,6 +185,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             '--languages',
             action='store_true',
             help='Converts language tags into xml:lang attributes.')
+        parser.add_argument(
+            '--metadata',
+            action='store_true',
+            help='Processes itemized lists below headings as metadata.')
 
     #
     # Sections
@@ -205,18 +227,19 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 	    # If we are at the top-most section (h1), then break out on
 	    # the second or later one.
 	    if heading == 'h1' and index > 2:
-	        log = logging.getLogger('docbook')
-	        log.warning('Skipping top section: ' + title)
+	        self.log.warning('Skipping top section: ' + title)
 	        continue
     
-	    # Start by appending the section.
+	    # Start by appending the section. We always include the
+	    # <info/> tag but we'll remove it later if it ends up
+	    # being blank.
 	    results.append('<' + element + '>')
-    
+            results.append('<info>')
+
             if len(title) > 0:
-                # Add the title block to the section.
-                results.append('<info><title>')
                 results.append(title)
-                results.append('</title></info>')
+
+            results.append('</info>')
     
             # Normally, the section ends at the end of the second element
             # (which contains the body of the section), but if we find a

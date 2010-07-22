@@ -1,4 +1,6 @@
-=
+= First-Level Titles
+* Author: Name, Author
+* SubjectSets: Subject, Subject2, Subject3
 
 This is a section of text with a "en: English fancy quote" in the
 middle of it along with a `en: foreign phrase`. It is also multiple
