@@ -18,13 +18,20 @@ import mfgames.convert
 import mfgames.process
 
 #
+# Constants
+#
+
+DOCBOOK_NAMESPACE = "xmlns='http://docbook.org/ns/docbook'"
+MFGAMES_NAMESPACE = "xmlns:mw='urn:mfgames:writing:docbook,0"
+
+#
 # Creole Parser
 #
 
 BaseParser = creole11_base()
 
 class DocbookCreoleParser(BaseParser):
-    p = Paragraph('para')
+    p = Paragraph('simpara')
     indented = IndentedBlock('blockquote', '>', None, None)
 
     simple_element = SimpleElement(token_dict={
@@ -74,6 +81,18 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         # Convert the file into an XML string. 
         contents = parser(contents)
+
+        # Start by initializing the namespaces.
+        namespaces = [DOCBOOK_NAMESPACE]
+
+        # If we need to number the paragraphs, we do that and add the
+        # namespace for the numbering elements.
+        if args.number_paragraphs:
+            # Add the namespace so we can add an attribute.
+            namespaces.append(MFGAMES_NAMESPACE)
+
+            # Go through all the paragraphs and number them
+            contents = self.number_paragraphs(contents)
 
         # Convert the typographical quotes into <quote> tags.
         contents = re.sub(r'&amp;#(\d+);', r'&#\1;', contents)
@@ -140,12 +159,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
-        namespaces = " ".join([
-	    "xmlns='http://docbook.org/ns/docbook'",
-	    "xmlns:mw='http://mfgames.com/mfgames-writing'" ])
+        namespaces_str = " ".join(namespaces)
         contents = re.sub(
 	    '<article>',
-	    '<article ' + namespaces + ' version="5.0">',
+	    '<article ' + namespaces_str + ' version="5.0">',
 	    contents)
         contents = '<?xml version="1.0" encoding="UTF-8"?>' + contents
 
@@ -159,6 +176,28 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         output = open(output_filename, 'w')
         output.write(contents)
         output.close()
+
+    def number_paragraphs(self, contents):
+        """
+        Goes through the contents and numbers every paragraph starting
+        with the first one.
+        """
+
+        # Start by splitting on the paragraph tag but keeping the tag
+        paragraphs = re.split('(<simpara>)', contents)
+
+        # Through all the paragraphs and find the simple tags and
+        # modify them in place.
+        count = 1
+
+        for index in range(len(paragraphs)):
+            if paragraphs[index] == '<simpara>':
+                paragraphs[index] = \
+                    '<simpara mw:para-index="{0}">'.format(count)
+                count = count + 1
+
+        # Combine the resulting paragraphs back and return it
+        return "".join(paragraphs)
 
     def process_metadata(self, contents):
         """
@@ -185,6 +224,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             '--languages',
             action='store_true',
             help='Converts language tags into xml:lang attributes.')
+        parser.add_argument(
+            '--number-paragraphs',
+            action='store_true',
+            help='Numbers the paragraphs in the resulting XML.')
         parser.add_argument(
             '--metadata',
             action='store_true',
