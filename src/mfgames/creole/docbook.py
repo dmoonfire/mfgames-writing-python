@@ -25,6 +25,18 @@ BaseParser = creole11_base()
 
 class DocbookCreoleParser(BaseParser):
     p = Paragraph('para')
+    indented = IndentedBlock('blockquote', '>', None, None)
+
+    simple_element = SimpleElement(token_dict={
+        '**' : 'strong',
+        '//' : 'emphasis'})
+
+    li = ListItem('listitem',list_tokens='*#')
+    ol = List('orderedlist','#',stop_tokens='*')
+    ul = List('itemizedlist','*',stop_tokens='#')
+    nested_ol = NestedList('orderedlist','#')
+    nested_ul = NestedList('itemizedlist','*')
+
 
 #
 # Conversion Class
@@ -72,6 +84,16 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = string.replace(contents, '\r', ' ')
         contents = string.replace(contents, '\t', ' ')
         contents = re.sub(r'\s+', ' ', contents, re.MULTILINE)
+
+        # Fix the strong tags.
+        contents = string.replace(
+            contents,
+            '<strong>',
+            '<emphasis role="strong">')
+        contents = string.replace(
+            contents,
+            '</strong>',
+            '</emphasis>')
         
         # Convert backticks into foreignphrases.
         if args.backticks:
