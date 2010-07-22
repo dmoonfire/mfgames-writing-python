@@ -104,6 +104,8 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = string.replace(contents, '\r', ' ')
         contents = string.replace(contents, '\t', ' ')
         contents = re.sub(r'\s+', ' ', contents, re.MULTILINE)
+        contents = string.replace(contents, '<simpara> ', '<simpara>')
+        contents = string.replace(contents, ' </simpara> ', '</simpara>')
 
         # Fix the strong tags.
         contents = string.replace(
