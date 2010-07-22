@@ -61,10 +61,19 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         # Convert the file into an XML string. 
         contents = parser(contents)
-    
-        # Convert the typographical quotes back.
+
+        # Convert the typographical quotes into <quote> tags.
         contents = re.sub(r'&amp;#(\d+);', r'&#\1;', contents)
-    
+        contents = re.sub(r'&#8220;', '<quote>', contents)
+        contents = re.sub(r'&#8221;', '</quote>', contents)
+
+        # Normalize the whitespace and trim the leading spaces.
+        contents = string.replace(contents, '\n', ' ')
+        contents = string.replace(contents, '\r', ' ')
+        contents = string.replace(contents, '\t', ' ')
+        contents = re.sub(r'\s+', ' ', contents, re.MULTILINE)
+        contents = string.replace(contents, '> <', '><')
+        
         # Wrap the headings into DocBook sections. We need to first
         # convert the empty elements ("<h2/>") into pairs ("<h2></h2>")
         # because of how this parser works. Then, we go through every
@@ -73,10 +82,14 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         contents = self.wrap_sections(contents, "section", 'h5',
 	    [ 'h4', 'h3', 'h2', 'h1' ])
-        contents = self.wrap_sections(contents, "section", 'h4', [ 'h3', 'h2', 'h1' ])
-        contents = self.wrap_sections(contents, "section", 'h3', [ 'h2', 'h1' ])
-        contents = self.wrap_sections(contents, "section", 'h2', [ 'h1' ])
-        contents = self.wrap_sections(contents, "article", 'h1', [ ])
+        contents = self.wrap_sections(contents, "section", 'h4',
+            [ 'h3', 'h2', 'h1' ])
+        contents = self.wrap_sections(contents, "section", 'h3',
+            [ 'h2', 'h1' ])
+        contents = self.wrap_sections(contents, "section", 'h2',
+            [ 'h1' ])
+        contents = self.wrap_sections(contents, "article", 'h1',
+            [ ])
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
