@@ -67,6 +67,14 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = re.sub(r'&#8220;', '<quote>', contents)
         contents = re.sub(r'&#8221;', '</quote>', contents)
 
+        # If we are parsing languages, then convert the language tags
+        # (2-3 character tags after a quote) into xml:lang elements.
+        if args.languages:
+            contents = re.sub(
+                r'<quote>(\w{2,3})\s*:\s*',
+                r'<quote xml:lang="\1">',
+                contents)
+
         # Normalize the whitespace and trim the leading spaces.
         contents = string.replace(contents, '\n', ' ')
         contents = string.replace(contents, '\r', ' ')
@@ -107,6 +115,20 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         output.write(contents)
         output.close()
     
+    def setup_arguments(self, parser):
+        """
+        Sets up the command-line arguments for the Creole to DocBook
+        conversion.
+        """
+
+        super(CreoleDocbookConvertProcess, self).setup_arguments(parser)
+
+        # Add the Creole-specific options.
+        parser.add_argument(
+            '--languages',
+            action='store_true',
+            help='Converts language tags into xml:lang attributes.')
+
     #
     # Sections
     #
