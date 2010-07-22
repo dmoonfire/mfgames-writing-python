@@ -21,8 +21,14 @@ import mfgames.process
 # Constants
 #
 
+# Namespaces
 DOCBOOK_NAMESPACE = "xmlns='http://docbook.org/ns/docbook'"
 MFGAMES_NAMESPACE = "xmlns:mw='urn:mfgames:writing:docbook,0"
+
+# Regular Expressions
+METADATA_LIST_REGEX = r'^(.*)</info><itemizedlist><listitem>\s*(.*?)\s*</listitem></itemizedlist>(.*)$'
+METADATA_LIST_ITEM_REGEX = r'\s*</listitem><listitem>\s*'
+METADATA_ITEM_REGEX = r'(.*?)\s*:\s*(.*)$'
 
 #
 # Creole Parser
@@ -153,11 +159,14 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = self.wrap_sections(contents, "article", 'h1',
             [ ])
 
+        # Trim the space between the tags.
+        contents = string.replace(contents, '> <', '><')
+
         # After we wrap the sections, we can process the metadata if
         # requested. These are encoded as itemized lists right after
         # the <info> tags.
-        if args.metadata:
-            self.process_metadata(contents)
+        if args.parse_metadata:
+            contents = self.parse_metadata(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
@@ -170,9 +179,6 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
         # Remove the info tags, if we have blanks.
         contents = string.replace(contents, '<info></info>', '')
-
-        # Trim the space between the tags.
-        contents = string.replace(contents, '> <', '><')
 
         # Write the contents to the output file.
         output = open(output_filename, 'w')
@@ -201,14 +207,64 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         # Combine the resulting paragraphs back and return it
         return "".join(paragraphs)
 
-    def process_metadata(self, contents):
+    def parse_metadata(self, contents):
         """
         Parses itemized lists right after the <info> tag and generates
         the appropriate metadata within the info tag.
         """
 
-        self.log.info('Processing metadata')
-    
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            METADATA_LIST_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the array
+            buf = [search.group(1)]
+
+            # Split apart the results and parse them as individual lines
+            parts = re.split(METADATA_LIST_ITEM_REGEX, search.group(2))
+
+            for metadata in parts:
+                # Split out the line item as a colon-separated list
+                split = re.match(METADATA_ITEM_REGEX, metadata)
+
+                if split == None:
+                    self.log.error('Cannot parse metadata: ' + metdata)
+                    continue
+
+                # Figure out what to do based on the first element
+                key = split.group(1)
+                value = split.group(2)
+
+                if key == 'Author':
+                    self.log.info('Author: ' + value)
+                else:
+                    split_terms = re.split(r'\s*;\s*', value)
+                    terms = "</subjectterm><subjectterm>".join(split_terms)
+                    subject = "".join([
+                        "<subjectset schema='",
+                        key,
+                        "'><subject><subjectterm>",
+                        terms,
+                        "</subjectterm></subject></subjectset>"])
+                    buf.append(subject)
+
+            # Reconstruct the elements
+            buf.append('</info>')
+            buf.append(search.group(3))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                METADATA_LIST_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Return the resulting contents
+        return contents
+
     def setup_arguments(self, parser):
         """
         Sets up the command-line arguments for the Creole to DocBook
@@ -231,7 +287,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             action='store_true',
             help='Numbers the paragraphs in the resulting XML.')
         parser.add_argument(
-            '--metadata',
+            '--parse-metadata',
             action='store_true',
             help='Processes itemized lists below headings as metadata.')
 
@@ -282,7 +338,9 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             results.append('<info>')
 
             if len(title) > 0:
+                results.append('<title>')
                 results.append(title)
+                results.append('</title>')
 
             results.append('</info>')
     
