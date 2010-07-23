@@ -119,7 +119,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             '</emphasis>')
         
         # Convert backticks into foreignphrases.
-        if args.backticks:
+        if args.parse_backticks:
             contents = re.sub(
                 r'`(.*?)`',
                 r'<foreignphrase>\1</foreignphrase>',
@@ -127,7 +127,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
         # If we are parsing languages, then convert the language tags
         # (2-3 character tags after a quote) into xml:lang elements.
-        if args.languages:
+        if args.parse_languages:
             contents = re.sub(
                 r'<quote>(\w{2,3})\s*:\s*',
                 r'<quote xml:lang="\1">',
@@ -213,11 +213,11 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
         # Add the Creole-specific options.
         parser.add_argument(
-            '--backticks',
+            '--parse-backticks',
             action='store_true',
             help='Converts backticks (`phrase`) into foreigh phrases.')
         parser.add_argument(
-            '--languages',
+            '--parse-languages',
             action='store_true',
             help='Converts language tags into xml:lang attributes.')
         parser.add_argument(
