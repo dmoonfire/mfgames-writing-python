@@ -168,6 +168,11 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         if args.parse_summaries:
             summary_parser = DocbookSummaryParser()
             contents = summary_parser.parse(contents)
+
+        # Parse special paragraphs with prefix notations.
+        if args.parse_special_paragraphs:
+            paragraph_parser = DocbookParagraphParser()
+            contents = paragraph_parser.parse(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
@@ -233,6 +238,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             '--parse-metadata',
             action='store_true',
             help='Processes itemized lists below headings as metadata.')
+        parser.add_argument(
+            '--parse-special-paragraphs',
+            action='store_true',
+            help="Parses special paragraph types into container objects.")
         parser.add_argument(
             '--parse-summaries',
             action='store_true',
@@ -429,6 +438,68 @@ class DocbookMetadataParser(object):
         
         # Return the resulting string
         return subject
+
+#
+# Paragraph Parser
+#
+
+class DocbookParagraphParser(object):
+    PARA_REGEX = r'^(.*)<simpara>(NOTE|TIP|WARNING):\s*(.*?)</simpara>(.*)$'
+
+    log = logging.getLogger('paragraph')
+
+    def parse(self, contents):
+        """
+        Parses paragraphs for leading prefixes to identify their
+        purpose. The following are used: NOTE, TIP, WARNING. Repeated
+        blocks are combined into a single outer tag automatically.
+        """
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.PARA_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the string as the contents
+            # before the regex.
+            buf = [search.group(1)]
+
+            # Create a container object, which is the second group in
+            # lower case.
+            buf.append('<')
+            buf.append(search.group(2).lower())
+            buf.append('><simpara>')
+
+            # Add the contents of the paragraph
+            buf.append(search.group(3))
+
+            # Finish up the container tag.
+            buf.append('</simpara>')
+            buf.append('</')
+            buf.append(search.group(2).lower())
+            buf.append('>')
+
+            # Finish up the string and put it back into the contents
+            buf.append(search.group(4))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.PARA_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Merge multiple blocks of the same type together.
+        types = ['note', 'tip', 'warning']
+
+        for para_type in types:
+            tags = "".join(['</', para_type, '><', para_type, '>'])
+            contents = string.replace(contents, tags, '')
+
+        # Return the resulting contents
+        return contents
 
 #
 # Summary Parser
