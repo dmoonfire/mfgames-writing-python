@@ -173,6 +173,14 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         if args.parse_special_paragraphs:
             paragraph_parser = DocbookParagraphParser()
             contents = paragraph_parser.parse(contents)
+
+        # Combine blockquotes that are next to each other.
+        contents = string.replace(contents, '</blockquote><blockquote>', '')
+
+        # Parse attributions inside blockquotes.
+        if args.parse_attributions:
+            attribution_parser = DocbookAttributionParser()
+            contents = attribution_parser.parse(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
@@ -226,6 +234,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             '--number-paragraphs',
             action='store_true',
             help='Numbers the paragraphs in the resulting XML.')
+        parser.add_argument(
+            '--parse-attributions',
+            action='store_true',
+            help='Parses attributions in blockquotes.')
         parser.add_argument(
             '--parse-backticks',
             action='store_true',
@@ -331,6 +343,75 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         # Return the resulting sections.
         return "".join(results)
+
+#
+# Attribution Parser
+#
+
+class DocbookAttributionParser(object):
+    REGEX = r'^(.*)<blockquote>(.*?)</blockquote>(.*)$'
+
+    log = logging.getLogger('attribution')
+
+    def parse(self, contents):
+        """
+        Parses blockquotes looking for attributions and marks them as
+        such.
+        """
+
+        # Keep track of all the components as we go through them.
+        buf = []
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the string as the contents
+            # before the regex.
+            buf.append(search.group(1))
+            buf.append('<blockquote>')
+
+            # Pull out the paragraphs and look for attributions. These
+            # are identified as a special character followed by text,
+            # but not ending with a paragraph.
+            inner = search.group(2)
+            inner_search = re.search(r'\s*&#8212;\s*([^<]+)</simpara>', inner)
+
+            # If we found an attribute, use it.
+            if inner_search != None:
+                # Remove what we found from the inner contents.
+                inner = string.replace(inner, inner_search.group(0), '')
+
+                # Put the attribution before the paragraphs in the
+                # blockquote. These are added with the
+                # 'buf.append(inner)' line below.
+                buf.append('<attribution>')
+                buf.append(inner_search.group(1))
+                buf.append('</attribution>')
+
+            buf.append(inner)
+            buf.append('</simpara>')
+
+            # Finish the blockquote and put it on the buffer.
+            buf.append('</blockquote>')
+
+            # Finish by replacing the contents with the stuff after
+            # the regex. This way, we only parse through a given
+            # blockquote once.
+            contents = search.group(3)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Return the resulting contents combined with the buffer so far.
+        buf.append(contents)
+        return "".join(buf)
 
 #
 # Metdata Parser
