@@ -51,7 +51,7 @@ class DocbookCreoleParser(BaseParser):
 #
 
 class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
-    help = 'Converts Creole files into DocBook 5.'
+    help = 'Converts Creole files into Docbook 5.'
     log = logging.getLogger('docbook')
 
     def get_extension(self):
@@ -59,7 +59,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
     def convert_file(self, args, input_filename, output_filename):
         """
-        Converts the given file into DocBook.
+        Converts the given file into Docbook.
         """
     
         # Read the file contents into memory. We need to use UTF-8 because
@@ -68,7 +68,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = input_file.read()
     
         # Create a parser that convert Creole into something that is
-        # roughly DocBook. We'll have to do some additional parsing once
+        # roughly Docbook. We'll have to do some additional parsing once
         # we get the file to handle attribute folding, quotes, and
         # sections.
         parser = Parser(
@@ -137,7 +137,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
                 r'<foreignphrase xml:lang="\1">',
                 contents)
 
-        # Wrap the headings into DocBook sections. We need to first
+        # Wrap the headings into Docbook sections. We need to first
         # convert the empty elements ("<h2/>") into pairs ("<h2></h2>")
         # because of how this parser works. Then, we go through every
         # heading level from the bottom and wrap it into a section.
@@ -163,6 +163,11 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         if args.parse_metadata:
             metadata_parser = DocbookMetadataParser()
             contents = metadata_parser.parse(contents)
+
+        # Parse the summary lines, if there are any of them.
+        if args.parse_summaries:
+            summary_parser = DocbookSummaryParser()
+            contents = summary_parser.parse(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
@@ -205,13 +210,17 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
     def setup_arguments(self, parser):
         """
-        Sets up the command-line arguments for the Creole to DocBook
+        Sets up the command-line arguments for the Creole to Docbook
         conversion.
         """
 
         super(CreoleDocbookConvertProcess, self).setup_arguments(parser)
 
         # Add the Creole-specific options.
+        parser.add_argument(
+            '--number-paragraphs',
+            action='store_true',
+            help='Numbers the paragraphs in the resulting XML.')
         parser.add_argument(
             '--parse-backticks',
             action='store_true',
@@ -221,13 +230,13 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             action='store_true',
             help='Converts language tags into xml:lang attributes.')
         parser.add_argument(
-            '--number-paragraphs',
-            action='store_true',
-            help='Numbers the paragraphs in the resulting XML.')
-        parser.add_argument(
             '--parse-metadata',
             action='store_true',
             help='Processes itemized lists below headings as metadata.')
+        parser.add_argument(
+            '--parse-summaries',
+            action='store_true',
+            help="Parses the summary paragraphs as abstract tags.")
 
     #
     # Sections
@@ -421,3 +430,49 @@ class DocbookMetadataParser(object):
         # Return the resulting string
         return subject
 
+#
+# Summary Parser
+#
+
+class DocbookSummaryParser(object):
+    SUMMARY_PARA_REGEX = r'^(.*)</info><simpara>SUMMARY:\s*(.*?)</simpara>(.*)$'
+
+    log = logging.getLogger('summary')
+
+    def parse(self, contents):
+        """
+        Parses the contents for summary lines. These are paragraphs that
+        start with SUMMARY: and are merged into a single abstract.
+        """
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.SUMMARY_PARA_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the array
+            buf = [search.group(1)]
+
+            # Convert this into an abstract inside the <info> element.
+            buf.append('<abstract><simpara>')
+            buf.append(search.group(2))
+            buf.append('</simpara></abstract>')
+            buf.append('</info>')
+
+            # Finish up the string and put it back into the contents
+            buf.append(search.group(3))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.SUMMARY_PARA_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Merge multiple summary paragraphs (now abstracts) together.
+        contents = string.replace(contents, '</abstract><abstract>', '')
+
+        # Return the resulting contents
+        return contents

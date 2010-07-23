@@ -2,9 +2,13 @@
 * Author: Name, Author
 * SubjectSets: Subject; Subject2; Subject3
 
+SUMMARY: This is a summary line.
+
 This is a section of text with a "en: English fancy quote" in the
 middle of it along with a `en: foreign phrase`. It is also multiple
 lines and parses into a single paragraph.
+
+NOTE: This is a note.
 
 Donec ultricies porta purus id posuere. Nunc vestibulum sodales
 facilisis. **Sed vel neque ante**, at tincidunt felis. Ut dapibus, leo
@@ -79,6 +83,11 @@ tincidunt. Nulla lobortis gravida accumsan. Sed mollis ornare enim
 vitae dapibus. 
 
 == Heading 2a
+
+SUMMARY: Line 1. This is a very long line which means it will span
+across multiple lines.
+
+SUMMARY: Line 2.
 
 This is a section of text with a "es: Spanish fancy quote" in the
 middle of it. It is also multiple lines and parses into a single
