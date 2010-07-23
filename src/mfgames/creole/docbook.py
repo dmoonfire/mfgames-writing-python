@@ -25,11 +25,6 @@ import mfgames.process
 DOCBOOK_NAMESPACE = "xmlns='http://docbook.org/ns/docbook'"
 MFGAMES_NAMESPACE = "xmlns:mw='urn:mfgames:writing:docbook,0"
 
-# Regular Expressions
-METADATA_LIST_REGEX = r'^(.*)</info><itemizedlist><listitem>\s*(.*?)\s*</listitem></itemizedlist>(.*)$'
-METADATA_LIST_ITEM_REGEX = r'\s*</listitem><listitem>\s*'
-METADATA_ITEM_REGEX = r'(.*?)\s*:\s*(.*)$'
-
 #
 # Creole Parser
 #
@@ -113,7 +108,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = string.replace(contents, '<simpara> ', '<simpara>')
         contents = string.replace(contents, ' </simpara> ', '</simpara>')
 
-        # Fix the strong tags.
+        # Fix the strong tags and make them emphasis.
         contents = string.replace(
             contents,
             '<strong>',
@@ -166,7 +161,8 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         # requested. These are encoded as itemized lists right after
         # the <info> tags.
         if args.parse_metadata:
-            contents = self.parse_metadata(contents)
+            metadata_parser = DocbookMetadataParser()
+            contents = metadata_parser.parse(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
@@ -206,64 +202,6 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
         # Combine the resulting paragraphs back and return it
         return "".join(paragraphs)
-
-    def parse_metadata(self, contents):
-        """
-        Parses itemized lists right after the <info> tag and generates
-        the appropriate metadata within the info tag.
-        """
-
-        # Go through each itemized list right after an <info> tag in turn.
-        search = re.search(
-            METADATA_LIST_REGEX,
-            contents,
-            re.MULTILINE)
-
-        while search != None:
-            # Save the first parts of the array
-            buf = [search.group(1)]
-
-            # Split apart the results and parse them as individual lines
-            parts = re.split(METADATA_LIST_ITEM_REGEX, search.group(2))
-
-            for metadata in parts:
-                # Split out the line item as a colon-separated list
-                split = re.match(METADATA_ITEM_REGEX, metadata)
-
-                if split == None:
-                    self.log.error('Cannot parse metadata: ' + metdata)
-                    continue
-
-                # Figure out what to do based on the first element
-                key = split.group(1)
-                value = split.group(2)
-
-                if key == 'Author':
-                    self.log.info('Author: ' + value)
-                else:
-                    split_terms = re.split(r'\s*;\s*', value)
-                    terms = "</subjectterm><subjectterm>".join(split_terms)
-                    subject = "".join([
-                        "<subjectset schema='",
-                        key,
-                        "'><subject><subjectterm>",
-                        terms,
-                        "</subjectterm></subject></subjectset>"])
-                    buf.append(subject)
-
-            # Reconstruct the elements
-            buf.append('</info>')
-            buf.append(search.group(3))
-            contents = "".join(buf)
-
-            # Look for the next match in the contents
-            search = re.search(
-                METADATA_LIST_REGEX,
-                contents,
-                re.MULTILINE)
-
-        # Return the resulting contents
-        return contents
 
     def setup_arguments(self, parser):
         """
@@ -375,3 +313,111 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         # Return the resulting sections.
         return "".join(results)
+
+#
+# Metdata Parser
+#
+
+class DocbookMetadataParser(object):
+    # Regular Expressions
+    METADATA_LIST_REGEX = r'^(.*)</info><itemizedlist><listitem>\s*(.*?)\s*</listitem></itemizedlist>(.*)$'
+    METADATA_LIST_ITEM_REGEX = r'\s*</listitem><listitem>\s*'
+    METADATA_ITEM_REGEX = r'(.*?)\s*:\s*(.*)$'
+
+    log = logging.getLogger('metadata')
+
+    def parse(self, contents):
+        """
+        Parses itemized lists right after the <info> tag and generates
+        the appropriate metadata within the info tag.
+        """
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.METADATA_LIST_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the array
+            buf = [search.group(1)]
+
+            # Split apart the results and parse them as individual lines
+            parts = re.split(self.METADATA_LIST_ITEM_REGEX, search.group(2))
+
+            for metadata in parts:
+                # Split out the line item as a colon-separated list
+                split = re.match(self.METADATA_ITEM_REGEX, metadata)
+
+                if split == None:
+                    self.log.error('Cannot parse metadata: ' + metdata)
+                    continue
+
+                # Figure out what to do based on the first element
+                key = split.group(1)
+                value = split.group(2)
+
+                if key == 'Author':
+                    buf.append(self.create_author(value))
+                else:
+                    buf.append(self.create_subjectset(key, value))
+
+            # Reconstruct the elements
+            buf.append('</info>')
+            buf.append(search.group(3))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.METADATA_LIST_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Return the resulting contents
+        return contents
+
+    def create_author(self, value):
+        """
+        Create an <author> tag that represents the author string. The
+        author string is "Last Name, First Name".
+        """
+
+        # Split on the comma for the name
+        names = re.split(r'\s*,\s*', value)
+
+        # Create the XML tag for the surname which we always
+        # include. If we have a second name, we treat add it as the
+        # first name.
+        buf = ['<author><surname>', names[0], '</surname>']
+
+        if len(names) > 1:
+            buf.append('<firstname>')
+            buf.append(names[1])
+            buf.append('</firstname>')
+
+        buf.append('</author>')
+
+        # Return the resulting string.
+        return "".join(buf)
+
+    def create_subjectset(self, key, value):
+        """
+        Create a subject XML fragment and return the results.
+        """
+
+        # Split on the semicolon for the subjectset.
+        split_terms = re.split(r'\s*;\s*', value)
+
+        # Create a fragment with the subject.
+        terms = "</subjectterm></subject><subject><subjectterm>" \
+            .join(split_terms)
+        subject = "".join([
+            "<subjectset schema='",
+            key,
+            "'><subject><subjectterm>",
+            terms,
+            "</subjectterm></subject></subjectset>"])
+        
+        # Return the resulting string
+        return subject
+
