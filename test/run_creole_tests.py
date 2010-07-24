@@ -51,6 +51,7 @@ class CreoleDocbookTests(unittest.TestCase):
         parameters.append(input_filename)
 
         # Run the tool with the given parameters.
+        #print(parameters)
         tool.do_creole_tool(parameters)
 
         # Load in the expected and resulting file.
@@ -67,6 +68,12 @@ class CreoleDocbookTests(unittest.TestCase):
             expected_contents,
             results_contents,
             "The contents of " + results_filename + " were not expected.")
+
+        # Remove the run file and log.
+        os.remove(results_filename)
+
+        if os.path.exists(log_filename):
+            os.remove(log_filename)
 
     def test_localwords(self):
         self.run_tool(
