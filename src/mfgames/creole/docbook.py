@@ -18,13 +18,21 @@ import mfgames.convert
 import mfgames.process
 
 #
+# Constants
+#
+
+# Namespaces
+DOCBOOK_NAMESPACE = "xmlns='http://docbook.org/ns/docbook'"
+MFGAMES_NAMESPACE = "xmlns:mw='urn:mfgames:writing:docbook,0"
+
+#
 # Creole Parser
 #
 
 BaseParser = creole11_base()
 
 class DocbookCreoleParser(BaseParser):
-    p = Paragraph('para')
+    p = Paragraph('simpara')
     indented = IndentedBlock('blockquote', '>', None, None)
 
     simple_element = SimpleElement(token_dict={
@@ -43,7 +51,7 @@ class DocbookCreoleParser(BaseParser):
 #
 
 class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
-    help = 'Converts Creole files into DocBook 5.'
+    help = 'Converts Creole files into Docbook 5.'
     log = logging.getLogger('docbook')
 
     def get_extension(self):
@@ -51,7 +59,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
     def convert_file(self, args, input_filename, output_filename):
         """
-        Converts the given file into DocBook.
+        Converts the given file into Docbook.
         """
     
         # Read the file contents into memory. We need to use UTF-8 because
@@ -60,7 +68,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = input_file.read()
     
         # Create a parser that convert Creole into something that is
-        # roughly DocBook. We'll have to do some additional parsing once
+        # roughly Docbook. We'll have to do some additional parsing once
         # we get the file to handle attribute folding, quotes, and
         # sections.
         parser = Parser(
@@ -75,6 +83,18 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         # Convert the file into an XML string. 
         contents = parser(contents)
 
+        # Start by initializing the namespaces.
+        namespaces = [DOCBOOK_NAMESPACE]
+
+        # If we need to number the paragraphs, we do that and add the
+        # namespace for the numbering elements.
+        if args.number_paragraphs:
+            # Add the namespace so we can add an attribute.
+            namespaces.append(MFGAMES_NAMESPACE)
+
+            # Go through all the paragraphs and number them
+            contents = self.number_paragraphs(contents)
+
         # Convert the typographical quotes into <quote> tags.
         contents = re.sub(r'&amp;#(\d+);', r'&#\1;', contents)
         contents = re.sub(r'&#8220;', '<quote>', contents)
@@ -85,8 +105,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = string.replace(contents, '\r', ' ')
         contents = string.replace(contents, '\t', ' ')
         contents = re.sub(r'\s+', ' ', contents, re.MULTILINE)
+        contents = string.replace(contents, '<simpara> ', '<simpara>')
+        contents = string.replace(contents, ' </simpara> ', '</simpara>')
 
-        # Fix the strong tags.
+        # Fix the strong tags and make them emphasis.
         contents = string.replace(
             contents,
             '<strong>',
@@ -97,7 +119,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             '</emphasis>')
         
         # Convert backticks into foreignphrases.
-        if args.backticks:
+        if args.parse_backticks:
             contents = re.sub(
                 r'`(.*?)`',
                 r'<foreignphrase>\1</foreignphrase>',
@@ -105,7 +127,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
         # If we are parsing languages, then convert the language tags
         # (2-3 character tags after a quote) into xml:lang elements.
-        if args.languages:
+        if args.parse_languages:
             contents = re.sub(
                 r'<quote>(\w{2,3})\s*:\s*',
                 r'<quote xml:lang="\1">',
@@ -115,7 +137,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
                 r'<foreignphrase xml:lang="\1">',
                 contents)
 
-        # Wrap the headings into DocBook sections. We need to first
+        # Wrap the headings into Docbook sections. We need to first
         # convert the empty elements ("<h2/>") into pairs ("<h2></h2>")
         # because of how this parser works. Then, we go through every
         # heading level from the bottom and wrap it into a section.
@@ -132,45 +154,76 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = self.wrap_sections(contents, "article", 'h1',
             [ ])
 
+        # Trim the space between the tags.
+        contents = string.replace(contents, '> <', '><')
+
         # After we wrap the sections, we can process the metadata if
         # requested. These are encoded as itemized lists right after
         # the <info> tags.
-        if args.metadata:
-            self.process_metadata(contents)
+        if args.parse_metadata:
+            metadata_parser = DocbookMetadataParser()
+            contents = metadata_parser.parse(contents)
+
+        # Parse the summary lines, if there are any of them.
+        if args.parse_summaries:
+            summary_parser = DocbookSummaryParser()
+            contents = summary_parser.parse(contents)
+
+        # Parse special paragraphs with prefix notations.
+        if args.parse_special_paragraphs:
+            paragraph_parser = DocbookParagraphParser()
+            contents = paragraph_parser.parse(contents)
+
+        # Combine blockquotes that are next to each other.
+        contents = string.replace(contents, '</blockquote><blockquote>', '')
+
+        # Parse attributions inside blockquotes.
+        if args.parse_attributions:
+            attribution_parser = DocbookAttributionParser()
+            contents = attribution_parser.parse(contents)
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
-        namespaces = " ".join([
-	    "xmlns='http://docbook.org/ns/docbook'",
-	    "xmlns:mw='http://mfgames.com/mfgames-writing'" ])
+        namespaces_str = " ".join(namespaces)
         contents = re.sub(
 	    '<article>',
-	    '<article ' + namespaces + ' version="5.0">',
+	    '<article ' + namespaces_str + ' version="5.0">',
 	    contents)
         contents = '<?xml version="1.0" encoding="UTF-8"?>' + contents
 
         # Remove the info tags, if we have blanks.
         contents = string.replace(contents, '<info></info>', '')
 
-        # Trim the space between the tags.
-        contents = string.replace(contents, '> <', '><')
-
         # Write the contents to the output file.
         output = open(output_filename, 'w')
         output.write(contents)
         output.close()
 
-    def process_metadata(self, contents):
+    def number_paragraphs(self, contents):
         """
-        Parses itemized lists right after the <info> tag and generates
-        the appropriate metadata within the info tag.
+        Goes through the contents and numbers every paragraph starting
+        with the first one.
         """
 
-        self.log.info('Processing metadata')
-    
+        # Start by splitting on the paragraph tag but keeping the tag
+        paragraphs = re.split('(<simpara>)', contents)
+
+        # Through all the paragraphs and find the simple tags and
+        # modify them in place.
+        count = 1
+
+        for index in range(len(paragraphs)):
+            if paragraphs[index] == '<simpara>':
+                paragraphs[index] = \
+                    '<simpara mw:para-index="{0}">'.format(count)
+                count = count + 1
+
+        # Combine the resulting paragraphs back and return it
+        return "".join(paragraphs)
+
     def setup_arguments(self, parser):
         """
-        Sets up the command-line arguments for the Creole to DocBook
+        Sets up the command-line arguments for the Creole to Docbook
         conversion.
         """
 
@@ -178,17 +231,33 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
 
         # Add the Creole-specific options.
         parser.add_argument(
-            '--backticks',
+            '--number-paragraphs',
+            action='store_true',
+            help='Numbers the paragraphs in the resulting XML.')
+        parser.add_argument(
+            '--parse-attributions',
+            action='store_true',
+            help='Parses attributions in blockquotes.')
+        parser.add_argument(
+            '--parse-backticks',
             action='store_true',
             help='Converts backticks (`phrase`) into foreigh phrases.')
         parser.add_argument(
-            '--languages',
+            '--parse-languages',
             action='store_true',
             help='Converts language tags into xml:lang attributes.')
         parser.add_argument(
-            '--metadata',
+            '--parse-metadata',
             action='store_true',
             help='Processes itemized lists below headings as metadata.')
+        parser.add_argument(
+            '--parse-special-paragraphs',
+            action='store_true',
+            help="Parses special paragraph types into container objects.")
+        parser.add_argument(
+            '--parse-summaries',
+            action='store_true',
+            help="Parses the summary paragraphs as abstract tags.")
 
     #
     # Sections
@@ -237,7 +306,9 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             results.append('<info>')
 
             if len(title) > 0:
+                results.append('<title>')
                 results.append(title)
+                results.append('</title>')
 
             results.append('</info>')
     
@@ -272,3 +343,288 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
     
         # Return the resulting sections.
         return "".join(results)
+
+#
+# Attribution Parser
+#
+
+class DocbookAttributionParser(object):
+    REGEX = r'^(.*)<blockquote>(.*?)</blockquote>(.*)$'
+
+    log = logging.getLogger('attribution')
+
+    def parse(self, contents):
+        """
+        Parses blockquotes looking for attributions and marks them as
+        such.
+        """
+
+        # Keep track of all the components as we go through them.
+        buf = []
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the string as the contents
+            # before the regex.
+            buf.append(search.group(1))
+            buf.append('<blockquote>')
+
+            # Pull out the paragraphs and look for attributions. These
+            # are identified as a special character followed by text,
+            # but not ending with a paragraph.
+            inner = search.group(2)
+            inner_search = re.search(r'\s*&#8212;\s*([^<]+)</simpara>', inner)
+
+            # If we found an attribute, use it.
+            if inner_search != None:
+                # Remove what we found from the inner contents.
+                inner = string.replace(inner, inner_search.group(0), '')
+
+                # Put the attribution before the paragraphs in the
+                # blockquote. These are added with the
+                # 'buf.append(inner)' line below.
+                buf.append('<attribution>')
+                buf.append(inner_search.group(1))
+                buf.append('</attribution>')
+
+            buf.append(inner)
+            buf.append('</simpara>')
+
+            # Finish the blockquote and put it on the buffer.
+            buf.append('</blockquote>')
+
+            # Finish by replacing the contents with the stuff after
+            # the regex. This way, we only parse through a given
+            # blockquote once.
+            contents = search.group(3)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Return the resulting contents combined with the buffer so far.
+        buf.append(contents)
+        return "".join(buf)
+
+#
+# Metdata Parser
+#
+
+class DocbookMetadataParser(object):
+    # Regular Expressions
+    METADATA_LIST_REGEX = r'^(.*)</info><itemizedlist><listitem>\s*(.*?)\s*</listitem></itemizedlist>(.*)$'
+    METADATA_LIST_ITEM_REGEX = r'\s*</listitem><listitem>\s*'
+    METADATA_ITEM_REGEX = r'(.*?)\s*:\s*(.*)$'
+
+    log = logging.getLogger('metadata')
+
+    def parse(self, contents):
+        """
+        Parses itemized lists right after the <info> tag and generates
+        the appropriate metadata within the info tag.
+        """
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.METADATA_LIST_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the array
+            buf = [search.group(1)]
+
+            # Split apart the results and parse them as individual lines
+            parts = re.split(self.METADATA_LIST_ITEM_REGEX, search.group(2))
+
+            for metadata in parts:
+                # Split out the line item as a colon-separated list
+                split = re.match(self.METADATA_ITEM_REGEX, metadata)
+
+                if split == None:
+                    self.log.error('Cannot parse metadata: ' + metdata)
+                    continue
+
+                # Figure out what to do based on the first element
+                key = split.group(1)
+                value = split.group(2)
+
+                if key == 'Author':
+                    buf.append(self.create_author(value))
+                else:
+                    buf.append(self.create_subjectset(key, value))
+
+            # Reconstruct the elements
+            buf.append('</info>')
+            buf.append(search.group(3))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.METADATA_LIST_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Return the resulting contents
+        return contents
+
+    def create_author(self, value):
+        """
+        Create an <author> tag that represents the author string. The
+        author string is "Last Name, First Name".
+        """
+
+        # Split on the comma for the name
+        names = re.split(r'\s*,\s*', value)
+
+        # Create the XML tag for the surname which we always
+        # include. If we have a second name, we treat add it as the
+        # first name.
+        buf = ['<author><surname>', names[0], '</surname>']
+
+        if len(names) > 1:
+            buf.append('<firstname>')
+            buf.append(names[1])
+            buf.append('</firstname>')
+
+        buf.append('</author>')
+
+        # Return the resulting string.
+        return "".join(buf)
+
+    def create_subjectset(self, key, value):
+        """
+        Create a subject XML fragment and return the results.
+        """
+
+        # Split on the semicolon for the subjectset.
+        split_terms = re.split(r'\s*;\s*', value)
+
+        # Create a fragment with the subject.
+        terms = "</subjectterm></subject><subject><subjectterm>" \
+            .join(split_terms)
+        subject = "".join([
+            "<subjectset schema='",
+            key,
+            "'><subject><subjectterm>",
+            terms,
+            "</subjectterm></subject></subjectset>"])
+        
+        # Return the resulting string
+        return subject
+
+#
+# Paragraph Parser
+#
+
+class DocbookParagraphParser(object):
+    PARA_REGEX = r'^(.*)<simpara>(NOTE|TIP|WARNING):\s*(.*?)</simpara>(.*)$'
+
+    log = logging.getLogger('paragraph')
+
+    def parse(self, contents):
+        """
+        Parses paragraphs for leading prefixes to identify their
+        purpose. The following are used: NOTE, TIP, WARNING. Repeated
+        blocks are combined into a single outer tag automatically.
+        """
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.PARA_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the string as the contents
+            # before the regex.
+            buf = [search.group(1)]
+
+            # Create a container object, which is the second group in
+            # lower case.
+            buf.append('<')
+            buf.append(search.group(2).lower())
+            buf.append('><simpara>')
+
+            # Add the contents of the paragraph
+            buf.append(search.group(3))
+
+            # Finish up the container tag.
+            buf.append('</simpara>')
+            buf.append('</')
+            buf.append(search.group(2).lower())
+            buf.append('>')
+
+            # Finish up the string and put it back into the contents
+            buf.append(search.group(4))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.PARA_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Merge multiple blocks of the same type together.
+        types = ['note', 'tip', 'warning']
+
+        for para_type in types:
+            tags = "".join(['</', para_type, '><', para_type, '>'])
+            contents = string.replace(contents, tags, '')
+
+        # Return the resulting contents
+        return contents
+
+#
+# Summary Parser
+#
+
+class DocbookSummaryParser(object):
+    SUMMARY_PARA_REGEX = r'^(.*)</info><simpara>SUMMARY:\s*(.*?)</simpara>(.*)$'
+
+    log = logging.getLogger('summary')
+
+    def parse(self, contents):
+        """
+        Parses the contents for summary lines. These are paragraphs that
+        start with SUMMARY: and are merged into a single abstract.
+        """
+
+        # Go through each itemized list right after an <info> tag in turn.
+        search = re.search(
+            self.SUMMARY_PARA_REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Save the first parts of the array
+            buf = [search.group(1)]
+
+            # Convert this into an abstract inside the <info> element.
+            buf.append('<abstract><simpara>')
+            buf.append(search.group(2))
+            buf.append('</simpara></abstract>')
+            buf.append('</info>')
+
+            # Finish up the string and put it back into the contents
+            buf.append(search.group(3))
+            contents = "".join(buf)
+
+            # Look for the next match in the contents
+            search = re.search(
+                self.SUMMARY_PARA_REGEX,
+                contents,
+                re.MULTILINE)
+
+        # Merge multiple summary paragraphs (now abstracts) together.
+        contents = string.replace(contents, '</abstract><abstract>', '')
+
+        # Return the resulting contents
+        return contents
