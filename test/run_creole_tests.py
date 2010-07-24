@@ -68,6 +68,11 @@ class CreoleDocbookTests(unittest.TestCase):
             results_contents,
             "The contents of " + results_filename + " were not expected.")
 
+    def test_localwords(self):
+        self.run_tool(
+            'creole/creole_docbook_localwords',
+            ['docbook', '--ignore-localwords'])
+
     def test_one_h1(self):
         self.run_tool(
             'creole/creole_docbook_one_h1',

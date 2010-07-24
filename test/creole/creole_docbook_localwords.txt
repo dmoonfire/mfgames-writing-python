@@ -1,0 +1,7 @@
+= Testing LocalWords
+
+The output of this file will not include the LocalWords paragraphs
+below, but will include this paragraph.
+
+LocalWords: LocalWords asdf askdfj lkgj dslkjsdf lkasjdf lksjdf
+LocalWords: lkgjsldkjg ldfkjeobij sdvklaj sdflkj sdflkjsdf

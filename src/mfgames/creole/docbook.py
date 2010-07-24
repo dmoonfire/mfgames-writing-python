@@ -174,6 +174,11 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
             paragraph_parser = DocbookParagraphParser()
             contents = paragraph_parser.parse(contents)
 
+        # Strip out LocalWords paragraphs since this is a common
+        # format for buffer- or file-specific dictionaries.
+        if args.ignore_localwords:
+            contents = re.sub('<simpara>LocalWords:.*?</simpara>', '', contents)
+
         # Combine blockquotes that are next to each other.
         contents = string.replace(contents, '</blockquote><blockquote>', '')
 
@@ -230,6 +235,10 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         super(CreoleDocbookConvertProcess, self).setup_arguments(parser)
 
         # Add the Creole-specific options.
+        parser.add_argument(
+            '--ignore-localwords',
+            action='store_true',
+            help='Strips out paragraphs starting with LocalWords:')
         parser.add_argument(
             '--number-paragraphs',
             action='store_true',
