@@ -39,7 +39,7 @@ class ConvertProcess(mfgames.process.Process):
         # and don't bother looping since we know there is exactly one file.
         if args.output:
             # Convert a single file with the given filename.
-            self._convert_file(args, files[0], args.output)
+            self._convert_file(args, args.files[0], args.output)
         else:
             # Convert all the outputs, mapping the output as needed.
             for filename in args.files:
@@ -80,6 +80,9 @@ class ConvertProcess(mfgames.process.Process):
         Sets up the command-line arguments for a convert process.
         """
 
+        # Add the base arguments.
+        super(ConvertProcess, self).setup_arguments(parser)
+
         # Set up the options for conversions.
         parser.add_argument(
             '-d', '--directory',
@@ -93,7 +96,7 @@ class ConvertProcess(mfgames.process.Process):
             help='If set, replace the output file even if it already exists.')
         parser.add_argument(
             '-o', '--output',
-            type=argparse.FileType('w'),
+            type=str,
             help='The output of the conversion. This may only be used with a single file.')
 
         # We use the 'str' instead of the FileType since we will be

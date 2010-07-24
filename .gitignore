@@ -1,3 +1,6 @@
 *~
 *.pyc
 *.results
+*.log
+
+/test/creole/*.xml

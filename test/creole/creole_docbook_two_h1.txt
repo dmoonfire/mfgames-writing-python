@@ -1,0 +1,7 @@
+= Heading 1
+
+This is the first paragraph in the file.
+
+= Ignored Heading
+
+This heading will be ignored in the output.

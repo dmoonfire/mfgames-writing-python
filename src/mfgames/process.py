@@ -14,3 +14,9 @@ class Process(object):
         """
         Sets up the command-line arguments for the process.
         """
+
+        parser.add_argument(
+            "--log",
+            type=str,
+            help="If set, the output for logging goes to the given filename.")
+
