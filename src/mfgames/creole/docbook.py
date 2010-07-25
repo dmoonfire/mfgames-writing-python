@@ -14,16 +14,9 @@ from creoleparser.core import *
 from smartypants import smartyPants
 
 # Internal Imports
+import mfgames.constants
 import mfgames.convert
 import mfgames.process
-
-#
-# Constants
-#
-
-# Namespaces
-DOCBOOK_NAMESPACE = "xmlns='http://docbook.org/ns/docbook'"
-MFGAMES_NAMESPACE = "xmlns:mw='urn:mfgames:writing:docbook,0"
 
 #
 # Creole Parser
@@ -84,13 +77,13 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = parser(contents)
 
         # Start by initializing the namespaces.
-        namespaces = [DOCBOOK_NAMESPACE]
+        namespaces = [mfgames.constants.DOCBOOK_NAMESPACE]
 
         # If we need to number the paragraphs, we do that and add the
         # namespace for the numbering elements.
         if args.number_paragraphs:
             # Add the namespace so we can add an attribute.
-            namespaces.append(MFGAMES_NAMESPACE)
+            namespaces.append(mfgames.constants.MFGAMES_NAMESPACE)
 
             # Go through all the paragraphs and number them
             contents = self.number_paragraphs(contents)

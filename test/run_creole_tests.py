@@ -17,7 +17,7 @@ src_directory = os.path.realpath(local_directory + "/../src")
 
 sys.path.append(src_directory)
 
-# Local Import
+# Internal Import
 src_module = os.path.join(src_directory, 'mfgames-creole.py')
 
 tool_code = open(src_module, 'rb')
