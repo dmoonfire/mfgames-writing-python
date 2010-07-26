@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article xmlns='http://docbook.org/ns/docbook' version="5.0">
+  <info>
+    <title>Indented Paragraph</title>
+  </info>
+  <simpara>
+    This is a long paragraph because it spans across multiple lines
+    and needs to be converted into a single paragraph inside the
+    DocBook 5 file. When it does this, it will lose the newlines.
+  </simpara>
+  <simpara>
+    This is a second long paragraph. It also spans across multiple
+    lines and will produce the correct output in DocBook 5.
+  </simpara>
+</article>

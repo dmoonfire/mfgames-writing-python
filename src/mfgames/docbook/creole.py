@@ -6,6 +6,7 @@
 import argparse
 import logging
 import os
+import re
 import textwrap
 import xml.sax
 
@@ -68,11 +69,17 @@ class DocbookCreoleHandler(xml.sax.ContentHandler):
             self.buffer = ""
 
     def wrap_buffer(self):
-        if self.args.columns > 0:
-            results = self.wrapper.fill(self.buffer)
-            return results
+        # Pull out the buffer and clean up the results, removing extra
+        # whitespace and filling to the given columns.
+        results = self.buffer
+        results = results.strip()
+        results = re.sub(r'\s+', ' ', results)
+        results = re.sub(r'\s+', ' ', results, re.MULTILINE)
 
-        return self.buffer
+        if self.args.columns > 0:
+            results = self.wrapper.fill(results)
+
+        return results
 
 #
 # Conversion Class
