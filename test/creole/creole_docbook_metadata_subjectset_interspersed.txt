@@ -1,5 +1,6 @@
 = Document Heading
 * Subject1: This; Is; Six; Terms
+* Subject2: Interspersed
 * Subject1: In; Total
 
-The above document only has one subject.
+The above document only has two subjects.
