@@ -6,6 +6,7 @@
 import argparse
 import codecs
 import logging
+import os
 import re
 
 # External Imports
@@ -195,6 +196,7 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         # Write the contents to the output file.
         output = open(output_filename, 'w')
         output.write(contents)
+        output.write(os.linesep)
         output.close()
 
     def number_paragraphs(self, contents):
@@ -474,6 +476,13 @@ class DocbookMetadataParser(object):
                 contents,
                 re.MULTILINE)
 
+        # Look for subjectsets that need to be combined since they
+        # have the same schema but potentially different tags.
+        contents = re.sub(
+            r'<subjectset schema="([^"]+)">(.*?)</subjectset>(.*?)<subjectset schema="\1">(.*?)</subjectset>',
+            '<subjectset schema="\\1">\\2\\4</subjectset>\\3',
+            contents)
+
         # Return the resulting contents
         return contents
 
@@ -513,9 +522,9 @@ class DocbookMetadataParser(object):
         terms = "</subjectterm></subject><subject><subjectterm>" \
             .join(split_terms)
         subject = "".join([
-            "<subjectset schema='",
+            '<subjectset schema="',
             key,
-            "'><subject><subjectterm>",
+            '"><subject><subjectterm>',
             terms,
             "</subjectterm></subject></subjectset>"])
         

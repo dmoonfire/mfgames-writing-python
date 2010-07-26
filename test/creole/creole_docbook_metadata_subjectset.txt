@@ -1,0 +1,5 @@
+= Document Heading
+* Subject1: This; Is; Four; Terms
+* Subject2: Only; Two
+
+The above document only has two subjects.

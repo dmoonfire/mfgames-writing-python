@@ -100,6 +100,16 @@ class CreoleDocbookTests(unittest.TestCase):
             'creole/creole_docbook_long_para',
             ['docbook'])
 
+    def test_metadata_subjectset(self):
+        self.run_tool(
+            'creole/creole_docbook_metadata_subjectset',
+            ['docbook', '--parse-metadata'])
+
+    def test_metadata_subjectset_repeated(self):
+        self.run_tool(
+            'creole/creole_docbook_metadata_subjectset_repeated',
+            ['docbook', '--parse-metadata'])
+
 #
 # Entry
 #
