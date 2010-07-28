@@ -115,6 +115,11 @@ class CreoleDocbookTests(unittest.TestCase):
             'creole/creole_docbook_metadata_subjectset_interspersed',
             ['docbook', '--parse-metadata'])
 
+    def test_quotes(self):
+        self.run_tool(
+            'creole/creole_docbook_quotes',
+            ['docbook'])
+
 #
 # Entry
 #

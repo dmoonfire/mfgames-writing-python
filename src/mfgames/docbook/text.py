@@ -4,6 +4,7 @@
 
 # System Imports
 import argparse
+import codecs
 import logging
 import os
 import re
@@ -51,6 +52,9 @@ class DocbookHandler(xml.sax.ContentHandler):
             self.output.write(os.linesep)
             self._in_info = True
 
+        if name == "quote":
+            self.append_quote(True)
+
         if name == "simpara":
             self.output.write(os.linesep)
 
@@ -76,6 +80,9 @@ class DocbookHandler(xml.sax.ContentHandler):
         if name == "section":
             self.depth = self.depth - 1
 
+        if name == "quote":
+            self.append_quote(False)
+
         if name == "title":
             self.write_heading(self.depth, self.buffer)
             self.buffer = ""
@@ -94,7 +101,16 @@ class DocbookHandler(xml.sax.ContentHandler):
             # Add the subject term to the given dictionary and clear
             # the buffer.
             self._subjectsets[self._subjectset_schema].append(self.buffer)
-            self.buffer = ''
+            self.buffer = ""
+
+    def append_quote(self, opening):
+        if self.args.quotes == 'simple':
+            self.buffer += '"'
+        if self.args.quotes == 'unicode':
+            if opening:
+                self.buffer += unichr(8220)
+            else:
+                self.buffer += unichr(8221)
 
     def wrap_buffer(self):
         # Pull out the buffer and clean up the results, removing extra
@@ -164,7 +180,7 @@ class DocbookTextConvertProcess(mfgames.convert.ConvertProcess):
         """
 
         # Open the output stream.
-        output = open(output_filename, 'w')
+        output = codecs.open(output_filename, 'w', 'utf-8')
 
         # Open an SAX XML stream for the DocBook contents.
         parser = xml.sax.make_parser()
@@ -196,6 +212,12 @@ class DocbookTextConvertProcess(mfgames.convert.ConvertProcess):
             default=0,
             type=int,
             help="Sets the number of columns to wrap output.")
+        parser.add_argument(
+            '--quotes',
+            default='simple',
+            choices=['simple', 'unicode'],
+            type=str,
+            help="Determines how quotes are rendered.")
         parser.add_argument(
             '--subjectset-position',
             default='none',

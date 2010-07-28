@@ -102,6 +102,11 @@ class DocbookCreoleTests(unittest.TestCase):
              '--subjectset-position', 'section-top',
              '--subjectset-format', 'list'])
 
+    def test_quotes(self):
+        self.run_tool(
+            'docbook/docbook_creole_quotes',
+            ['creole', '--columns', '70', '--quotes', 'simple'])
+
 #
 # Entry
 #
