@@ -95,6 +95,13 @@ class DocbookCreoleTests(unittest.TestCase):
             'docbook/docbook_creole_indented_para',
             ['creole', '--columns', '70'])
 
+    def test_subjectset(self):
+        self.run_tool(
+            'docbook/docbook_creole_subjectset',
+            ['creole',
+             '--subjectset-position', 'section-top',
+             '--subjectset-format', 'list'])
+
 #
 # Entry
 #
