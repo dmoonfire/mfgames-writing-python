@@ -8,6 +8,8 @@
 # System Imports
 import argparse
 import logging
+import os
+
 from os.path import exists, split, splitext, join
 
 # Internal Imports
@@ -54,7 +56,24 @@ class ConvertProcess(mfgames.process.Process):
                 dirname = split_parts[0]
 
                 if args.directory:
+                    # Start with the base directory name from the parameter.
                     dirname = args.directory
+
+                    # If we have a relative root, then the relative
+                    # directories from the input file.
+                    if args.relative_root != None:
+                        # Create the relative directory by removing
+                        # the relative root, strip off the leading
+                        # directory separator character, and join it
+                        # with the directory already parsed.
+                        relative = split_parts[0]
+                        relative = relative.replace(args.relative_root, '')
+                        relative = relative[1:]
+                        dirname = join(dirname, relative)
+
+                    # Create the directories if needed.
+                    if not exists(dirname):
+                        os.makedirs(dirname)
   
                 # Figure out the output file, which is the base name of
                 # the file plus the conversion-specific extension (as
@@ -98,6 +117,10 @@ class ConvertProcess(mfgames.process.Process):
             '-o', '--output',
             type=str,
             help='The output of the conversion. This may only be used with a single file.')
+        parser.add_argument(
+            '--relative-root',
+            type=str,
+            help='If defined, then the given value will be stripped from the input filenames and the resulting relative path will be used with the --directory option.')
 
         # We use the 'str' instead of the FileType since we will be
         # opening these files in many cases.
