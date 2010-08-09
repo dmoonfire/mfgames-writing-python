@@ -3,4 +3,8 @@
 *.results
 *.log
 
+build
+
 /test/creole/*.xml
+/src/mfgames-docbookc
+/src/mfgames-creolec

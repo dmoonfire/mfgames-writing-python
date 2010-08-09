@@ -14,7 +14,7 @@ import logging
 import sys
 
 # Local Imports
-import mfgames.creole.docbook
+import writing.docbook.creole
 
 #
 # Constants
@@ -27,17 +27,17 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 #
 
 processes = {
-    'docbook' : mfgames.creole.docbook.CreoleDocbookConvertProcess(),
+    'creole' : writing.docbook.creole.DocbookCreoleConvertProcess(),
     }
 
 #
 # Execution
 #
 
-def do_creole_tool(arguments):
+def do_docbook_tool(arguments):
     # Set up the primary parser.
     parser = argparse.ArgumentParser(
-        description='Manipulate and convert Creole documents.')
+        description='Manipulate and convert DocBook 5 documents.')
 
     # Go through the processes and add each one's subparser.
     subparsers = parser.add_subparsers()
@@ -77,4 +77,4 @@ def do_creole_tool(arguments):
 #
 
 if __name__ == "__main__":
-    do_creole_tool(sys.argv[1:])
+    do_docbook_tool(sys.argv[1:])

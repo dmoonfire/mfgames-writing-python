@@ -11,16 +11,16 @@ import textwrap
 import xml.sax
 
 # Internal Imports
-import mfgames.constants
-import mfgames.convert
-import mfgames.docbook.text
-import mfgames.process
+import writing.constants
+import writing.convert
+import writing.docbook.text
+import writing.process
 
 #
 # SAX Document Handler
 #
 
-class DocbookCreoleHandler(mfgames.docbook.text.DocbookHandler):
+class DocbookCreoleHandler(writing.docbook.text.DocbookHandler):
     def write_heading(self, depth, text):
         # Write out the section depth prefix
         self.output.write("=" * self.depth)
@@ -67,7 +67,7 @@ class DocbookCreoleHandler(mfgames.docbook.text.DocbookHandler):
 #
 
 class DocbookCreoleConvertProcess(
-    mfgames.docbook.text.DocbookTextConvertProcess):
+    writing.docbook.text.DocbookTextConvertProcess):
     help = 'Converts Docbook 5 files into Creole.'
     log = logging.getLogger('creole')
 

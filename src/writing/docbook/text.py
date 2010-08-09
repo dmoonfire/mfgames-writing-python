@@ -12,9 +12,9 @@ import textwrap
 import xml.sax
 
 # Internal Imports
-import mfgames.constants
-import mfgames.convert
-import mfgames.process
+import writing.constants
+import writing.convert
+import writing.process
 
 #
 # SAX Document Handler
@@ -170,7 +170,7 @@ class DocbookHandler(xml.sax.ContentHandler):
 # Conversion Class
 #
 
-class DocbookTextConvertProcess(mfgames.convert.ConvertProcess):
+class DocbookTextConvertProcess(writing.convert.ConvertProcess):
     help = 'Converts Docbook 5 files into text-based files.'
     log = logging.getLogger('creole')
 

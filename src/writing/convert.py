@@ -13,13 +13,13 @@ import os
 from os.path import exists, split, splitext, join
 
 # Internal Imports
-import mfgames.process
+import writing.process
 
 #
 # Convert Process
 #
 
-class ConvertProcess(mfgames.process.Process):
+class ConvertProcess(writing.process.Process):
     def process(self, args):
         """
         Performs the actions on the given arguments.

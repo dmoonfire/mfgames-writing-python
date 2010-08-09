@@ -15,9 +15,9 @@ from creoleparser.core import *
 from smartypants import smartyPants
 
 # Internal Imports
-import mfgames.constants
-import mfgames.convert
-import mfgames.process
+import writing.constants
+import writing.convert
+import writing.process
 
 #
 # Creole Parser
@@ -44,7 +44,7 @@ class DocbookCreoleParser(BaseParser):
 # Conversion Class
 #
 
-class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
+class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
     help = 'Converts Creole files into Docbook 5.'
     log = logging.getLogger('docbook')
 
@@ -78,13 +78,13 @@ class CreoleDocbookConvertProcess(mfgames.convert.ConvertProcess):
         contents = parser(contents)
 
         # Start by initializing the namespaces.
-        namespaces = [mfgames.constants.DOCBOOK_NAMESPACE]
+        namespaces = [writing.constants.DOCBOOK_NAMESPACE]
 
         # If we need to number the paragraphs, we do that and add the
         # namespace for the numbering elements.
         if args.number_paragraphs:
             # Add the namespace so we can add an attribute.
-            namespaces.append(mfgames.constants.MFGAMES_NAMESPACE)
+            namespaces.append(writing.constants.MFGAMES_NAMESPACE)
 
             # Go through all the paragraphs and number them
             contents = self.number_paragraphs(contents)
