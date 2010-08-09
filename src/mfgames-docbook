@@ -13,7 +13,12 @@ import argparse
 import logging
 import sys
 
-# Local Imports
+# Internal Search Path
+sys.path.append('/usr/share/mfgames-writing')
+sys.path.append('/usr/local/share/mfgames-writing')
+
+# Internal Imports
+import writing.docbook.bbcode
 import writing.docbook.creole
 
 #
@@ -27,6 +32,7 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 #
 
 processes = {
+    'bbcode' : writing.docbook.bbcode.DocbookBBCodeConvertProcess(),
     'creole' : writing.docbook.creole.DocbookCreoleConvertProcess(),
     }
 
