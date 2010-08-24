@@ -160,7 +160,7 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
             [ 'h2', 'h1' ])
         contents = self.wrap_sections(contents, "section", 'h2',
             [ 'h1' ])
-        contents = self.wrap_sections(contents, "article", 'h1',
+        contents = self.wrap_sections(contents, args.root_element, 'h1',
             [ ])
 
         # Trim the space between the tags.
@@ -277,6 +277,11 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
             '--parse-summaries',
             action='store_true',
             help="Parses the summary paragraphs as abstract tags.")
+        parser.add_argument(
+            '--root-element',
+            default='article',
+            choices=['article', 'chapter'],
+            help="Determines the root element for converted files.")
 
     #
     # Sections
