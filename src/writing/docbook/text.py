@@ -47,6 +47,10 @@ class DocbookHandler(xml.sax.ContentHandler):
             self.depth = 1
             self._in_info = True
 
+        if name == "chapter":
+            self.depth = 1
+            self._in_info = True
+
         if name == "section":
             self.depth = self.depth + 1
             self.output.write(os.linesep)
