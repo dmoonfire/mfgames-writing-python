@@ -68,13 +68,26 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
         parser = Parser(
 	    dialect=DocbookCreoleParser,
 	    method='xml')
+
+        # Normalize the construct of '"something-"' into something
+        # SmartyPants can handle.
+        contents = string.replace(contents, '-"', '--"')
     
-        # Change the typographical quotes into something aesthetic. We do
-        # this before converting from Creole because of the tags created
-        # by that parser potentially have quotes themselves.
-        contents = smartyPants(contents)
+        # Change the typographical quotes into something aesthetic. We
+        # do this before converting from Creole because of the tags
+        # created by that parser potentially have quotes
+        # themselves. We split this into different elements to speed
+        # up the regex as part of the conversion.
+        self.log.debug('Formatting normal quotes into typographic ones')
+        parts = unicode.split(contents, '\n\n')
+
+        for index in range(len(parts)):
+            parts[index] = smartyPants(parts[index])
+
+        contents = '\n\n'.join(parts)
     
-        # Convert the file into an XML string. 
+        # Convert the file into an XML string.
+        self.log.debug('Converting Creole to XML')
         contents = parser(contents)
 
         # Start by initializing the namespaces.
@@ -90,11 +103,13 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
             contents = self.number_paragraphs(contents)
 
         # Convert the typographical quotes into <quote> tags.
+        self.log.debug('Changing quotes into DocBook quote tags')
         contents = re.sub(r'&amp;#(\d+);', r'&#\1;', contents)
         contents = re.sub(r'&#8220;', '<quote>', contents)
         contents = re.sub(r'&#8221;', '</quote>', contents)
 
         # Normalize the whitespace and trim the leading spaces.
+        self.log.debug('Normalizing whitespace and paragraphs')
         contents = string.replace(contents, '\n', ' ')
         contents = string.replace(contents, '\r', ' ')
         contents = string.replace(contents, '\t', ' ')
