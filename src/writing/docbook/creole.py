@@ -23,12 +23,12 @@ import writing.process
 class DocbookCreoleHandler(writing.docbook.text.DocbookHandler):
     def write_heading(self, depth, text):
         # Write out the section depth prefix
-        self.output.write("=" * self.depth)
-        self.output.write(' ')
+        self.context.output.write("=" * self.context.depth)
+        self.context.output.write(' ')
             
         # Write out the title itself and finish with a newline.
-        self.output.write(self.wrap_buffer())
-        self.output.write(os.linesep)
+        self.context.output.write(self.wrap_buffer())
+        self.context.output.write(os.linesep)
 
     def write_subjectsets(self, subjectsets):
         """
@@ -40,11 +40,12 @@ class DocbookCreoleHandler(writing.docbook.text.DocbookHandler):
             # Go through the dictionary as sorted keys.
             for schema in sorted(subjectsets.keys()):
                 # Write out the beginning of the list.
-                self.output.write("* ")
-                self.output.write(schema)
-                self.output.write(": ")
-                self.output.write("; ".join(sorted(subjectsets[schema])))
-                self.output.write(os.linesep)
+                self.context.output.write("* ")
+                self.context.output.write(schema)
+                self.context.output.write(": ")
+                self.context.output.write(
+                    "; ".join(sorted(subjectsets[schema])))
+                self.context.output.write(os.linesep)
 
         # Determine if we are formatting as dokuwiki tags.
         if self.args.subjectset_format == 'dokuwiki-tags':
@@ -57,10 +58,10 @@ class DocbookCreoleHandler(writing.docbook.text.DocbookHandler):
                         tags.append(term)
 
             # Create the dokuwiki tags.
-            self.output.write("{{tag>")
-            self.output.write(" ".join(sorted(tags)))
-            self.output.write("}}")
-            self.output.write(os.linesep)
+            self.context.output.write("{{tag>")
+            self.context.output.write(" ".join(sorted(tags)))
+            self.context.output.write("}}")
+            self.context.output.write(os.linesep)
 
 #
 # Conversion Class
@@ -74,8 +75,8 @@ class DocbookCreoleConvertProcess(
     def get_extension(self):
         return "txt"
 
-    def get_handler(self, args, output):
-        return DocbookCreoleHandler(args, output)
+    def get_handler(self, args, filename, output, contents):
+        return DocbookCreoleHandler(args, filename, output, contents)
 
     def setup_arguments(self, parser):
         """
