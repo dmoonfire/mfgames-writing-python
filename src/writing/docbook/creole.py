@@ -22,6 +22,10 @@ import writing.process
 
 class DocbookCreoleHandler(writing.docbook.text.DocbookHandler):
     def write_heading(self, depth, text):
+        # If we have a depth, add a newline.
+        if self.depth > 1:
+            self.context.output.write(os.linesep)
+
         # Write out the section depth prefix
         self.context.output.write("=" * self.context.depth)
         self.context.output.write(' ')

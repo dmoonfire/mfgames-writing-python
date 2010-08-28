@@ -24,6 +24,9 @@ def is_structural(name):
     if name == "book":
         return True
     
+    if name == "article":
+        return True
+    
     if name == "chapter":
         return True
     
@@ -47,7 +50,7 @@ class TableOfContentsHandler(xml.sax.ContentHandler):
 
     def characters(self, contents):
         if self.in_info:
-            self.content.buffer += contents
+            self.buffer += contents
 
     def startElement(self, name, attrs):
         if name == "title":

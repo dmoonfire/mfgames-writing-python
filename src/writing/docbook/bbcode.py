@@ -23,12 +23,12 @@ import writing.process
 class DocbookBBCodeHandler(writing.docbook.text.DocbookHandler):
     def write_heading(self, depth, text):
         # Write out the section depth prefix
-        self.output.write("=" * self.depth)
-        self.output.write(' ')
+        self.context.output.write("=" * self.depth)
+        self.context.output.write(' ')
             
         # Write out the title itself and finish with a newline.
-        self.output.write(self.wrap_buffer())
-        self.output.write(os.linesep)
+        self.context.output.write(text)
+        self.context.output.write(os.linesep)
 
 #
 # Conversion Class
