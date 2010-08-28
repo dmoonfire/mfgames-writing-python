@@ -198,10 +198,16 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
     
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
-        namespaces_str = " ".join(namespaces)
+        header_attributes = " ".join(namespaces)
+
+        if args.id != None:
+            header_attributes += ' id="' + args.id + '"'
+
+        header_attributes += ' version="5.0"'
+
         contents = re.sub(
-	    '<article>',
-	    '<article ' + namespaces_str + ' version="5.0">',
+	    '<' + args.root_element + '>',
+	    '<' + args.root_element + ' ' + header_attributes + '>',
 	    contents)
         contents = '<?xml version="1.0" encoding="UTF-8"?>' + contents
 
@@ -245,6 +251,10 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
         super(CreoleDocbookConvertProcess, self).setup_arguments(parser)
 
         # Add the Creole-specific options.
+        parser.add_argument(
+            '--id',
+            type=str,
+            help='Assigns the id to the top-level generated DocBook element.')
         parser.add_argument(
             '--ignore-localwords',
             action='store_true',

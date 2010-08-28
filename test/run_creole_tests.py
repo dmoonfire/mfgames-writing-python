@@ -85,6 +85,11 @@ class CreoleDocbookTests(unittest.TestCase):
             'creole/creole_docbook_one_h1',
             ['docbook'])
 
+    def test_one_h1_id(self):
+        self.run_tool(
+            'creole/creole_docbook_one_h1_id',
+            ['docbook', '--id', 'test_one_h1_id'])
+
     def test_two_h1(self):
         self.run_tool(
             'creole/creole_docbook_two_h1',
