@@ -36,6 +36,7 @@ class TableOfContents():
     def __init__(self):
         self.buffer = unicode()
         self.depth = 0
+        self.id = None
 
 class TableOfContentsHandler(xml.sax.ContentHandler):
     def __init__(self):
@@ -58,6 +59,9 @@ class TableOfContentsHandler(xml.sax.ContentHandler):
             self.content = TableOfContents()
             self.content.depth = self.depth
             self.contents.append(self.content)
+
+            if attrs.has_key("id"):
+                self.content.id = attrs["id"]
 
     def endElement(self, name):
         if name == "title":
@@ -92,9 +96,11 @@ class DocbookHandler(xml.sax.ContentHandler):
         self.buffer = ""
         self.depth = 0
         self.filename = filename
+        self.need_toc = False
 
         # Keep track of the context
         self.context = ParsingContext()
+        self.top_context = self.context
         self.context.output = output
         self.contexts = [self.context]
 
@@ -143,6 +149,9 @@ class DocbookHandler(xml.sax.ContentHandler):
         # If the subjectset position is set at the bottom, give the
         # opportunity to write out the tags there.
         self._write_subjectsets('document-bottom')
+
+        if self.args.chunk > 0:
+            self.top_context.output.write(os.linesep)
 
     def endElement(self, name):
         # Based on the attribute name determines how we close the elements.

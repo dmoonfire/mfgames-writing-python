@@ -27,8 +27,16 @@ class DocbookCreoleHandler(writing.docbook.text.DocbookHandler):
         self.context.output.write(' ')
             
         # Write out the title itself and finish with a newline.
-        self.context.output.write(self.wrap_buffer())
+        self.context.output.write(text)
         self.context.output.write(os.linesep)
+
+        # Write out the TOC if we are chunking.
+        if self.args.chunk == self.depth - 1:
+            for content in self.contents:
+                if content.buffer == text:
+                    self.top_context.output.write(os.linesep)
+                    self.top_context.output.write(
+                        "* [[" + content.id + "|" + text + "]]")
 
     def write_subjectsets(self, subjectsets):
         """
