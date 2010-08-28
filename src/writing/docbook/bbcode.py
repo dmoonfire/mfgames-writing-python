@@ -42,8 +42,8 @@ class DocbookBBCodeConvertProcess(
     def get_extension(self):
         return "txt"
 
-    def get_handler(self, args, output):
-        return DocbookBBCodeHandler(args, output)
+    def get_handler(self, args, filename, output, contents):
+        return DocbookBBCodeHandler(args, filename, output, contents)
 
     def setup_arguments(self, parser):
         """
