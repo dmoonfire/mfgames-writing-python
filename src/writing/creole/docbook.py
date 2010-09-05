@@ -186,7 +186,7 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
         # Strip out LocalWords paragraphs since this is a common
         # format for buffer- or file-specific dictionaries.
         if args.ignore_localwords:
-            contents = re.sub('<simpara>LocalWords:.*?</simpara>', '', contents)
+            contents = re.sub('<simpara[^>]*>LocalWords:.*?</simpara>', '', contents)
 
         # Combine blockquotes that are next to each other.
         contents = string.replace(contents, '</blockquote><blockquote>', '')
@@ -566,7 +566,7 @@ class DocbookMetadataParser(object):
 #
 
 class DocbookParagraphParser(object):
-    PARA_REGEX = r'^(.*)<simpara>(NOTE|TIP|WARNING):\s*(.*?)</simpara>(.*)$'
+    PARA_REGEX = r'^(.*)<simpara[^>]*>(NOTE|TIP|WARNING):\s*(.*?)</simpara>(.*)$'
 
     log = logging.getLogger('paragraph')
 
@@ -628,7 +628,7 @@ class DocbookParagraphParser(object):
 #
 
 class DocbookSummaryParser(object):
-    SUMMARY_PARA_REGEX = r'^(.*)</info><simpara>SUMMARY:\s*(.*?)</simpara>(.*)$'
+    SUMMARY_PARA_REGEX = r'^(.*)</info><simpara[^>]*>SUMMARY:\s*(.*?)</simpara>(.*)$'
 
     log = logging.getLogger('summary')
 
