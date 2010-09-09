@@ -383,7 +383,7 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
 #
 
 class DocbookAttributionParser(object):
-    REGEX = r'^(.*)<blockquote>(.*?)</blockquote>(.*)$'
+    REGEX = r'^(.*?)<blockquote>(.*?)</blockquote>(.*)$'
 
     log = logging.getLogger('attribution')
 
@@ -413,7 +413,7 @@ class DocbookAttributionParser(object):
             # but not ending with a paragraph.
             inner = search.group(2)
             inner_search = re.search(r'\s*&#8212;\s*([^<]+)</simpara>', inner)
-
+            
             # If we found an attribute, use it.
             if inner_search != None:
                 # Remove what we found from the inner contents.
