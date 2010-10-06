@@ -559,8 +559,6 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
                         # to a space character.
                         tags.append(term.replace(' ', '_'))
 
-            tags.sort()
-
             # Create the dokuwiki tags.
             self.output.write("{{tag>")
             self.output.write(" ".join(sorted(tags)))
