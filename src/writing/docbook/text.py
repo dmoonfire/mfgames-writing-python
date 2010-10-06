@@ -53,13 +53,20 @@ class _StructureEntry(object):
 
         # Determine the output filename for this section, if any.
         self.output_filename = None
+        self.output_tag = None
+
+        if self.parent:
+            self.number = self.parent.get_element_number(xml_element)
+        else:
+            self.number = 0
 
         chunk_chapter = scanner.process.args.chunk_chapter
 
         if xml_element == "chapter" and chunk_chapter != 'no':
             filename = chunk_chapter.format(
                 id=self.docbook_id,
-                number=self.parent.get_element_number(xml_element))
+                number=self.number)
+            self.output_tag = filename
             self.output_filename = scanner.get_output_filename(filename)
             self.output_depth = 0
 
@@ -76,7 +83,7 @@ class _StructureEntry(object):
         
         # Otherwise, start at 1 and total up every element that has
         # the same docbook element name as given.
-        count = 1
+        count = 0
 
         for entry in self.children:
             if entry.docbook_element == docbook_element:
@@ -85,15 +92,19 @@ class _StructureEntry(object):
         return count
 
     def dump_self(self):
+        attrs = []
+
+        if self.number > 0:
+            attrs.append(' ' + format(self.number))
+
+        if self.output_tag:
+            attrs.append(", tag=" + self.output_tag)
+
         if self.output_filename:
-            output_filename = ', output=' + self.output_filename
-        else:
-            output_filename = ''
+            attrs.append(', output=' + self.output_filename)
 
         if self.docbook_id:
-            docbook_id = ', id=' + self.docbook_id
-        else:
-            docbook_id = ''
+            attrs.append(', id=' + self.docbook_id)
 
         if self.title:
             title = self.title
@@ -102,13 +113,12 @@ class _StructureEntry(object):
 
         prefix = '    ' * self.output_depth
 
-        print('%d %s%s [%s%s%s]' % (
+        print('%d %s%s [%s%s]' % (
             self.input_depth,
             prefix,
             title,
             self.docbook_element,
-            docbook_id,
-            output_filename))
+            ''.join(attrs)))
 
     def get_subjectsets(self, subjectsets):
         """Combines all the subjectsets from this entry and its children."""
@@ -369,7 +379,7 @@ class ConvertToTextFilesProcess(
         if name == "quote":
             self.append_quote(False)
 
-        if name == "simpara":
+        if name == "simpara" or name == "para":
             self.output.write(self.wrap_buffer())
             self.output.write(os.linesep)
             self.buffer = ""
@@ -393,6 +403,15 @@ class ConvertToTextFilesProcess(
         # If we don't have anything open, we don't need to do anything.
         if not self.output:
             return
+
+        # If our parent is the book level, write out the table of contents.
+        parent = self.structure_entry.parent
+        
+        if parent:
+            if self.structure_entry.number == 1:
+                if parent.docbook_element == 'book':
+                    self.write_newline()
+                    self.write_toc(parent)
 
         # Attempt to write out the subjectsets if we have them.
         self.write_subjectsets_position('document-bottom')
@@ -475,6 +494,9 @@ class ConvertToTextFilesProcess(
         self.write_newline()
         self.write_subjectsets(subjectsets)
 
+    def write_toc(self, structure_entry):
+        """Writes out the table of contents."""
+        pass
 
 class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
     """Handles the conversion from DocBook to Creole."""
@@ -564,6 +586,34 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
             self.output.write(" ".join(sorted(tags)))
             self.output.write("}}")
             self.output.write(os.linesep)
+
+    def write_toc(self, structure_entry):
+        """Writes out the table of contents."""
+
+        # Go through and build a tree of all the structure elements.
+        for child in structure_entry.children:
+            # Only write out the title elements if the child has a title.
+            if child.title:
+                # Create a nested tree.
+                self.output.write('*' * child.input_depth + ' ')
+
+                # If the child has a tag, create a link.
+                if child.output_tag:
+                    self.output.write('[[')
+                    self.output.write(child.output_tag)
+                    self.output.write('|')
+
+                self.output.write(child.title)
+
+                # Finish the tag, if we have one
+                if child.output_tag:
+                    self.output.write(']]')
+
+                # Finish off the line.
+                self.output.write(os.linesep)
+
+                # Go through the children's children
+                self.write_toc(child)
 
 
 class ConvertToBBCodeFilesProcess(ConvertToTextFilesProcess):
