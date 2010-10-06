@@ -31,8 +31,8 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 #
 
 processes = {
-    'bbcode' : writing.docbook.text.DocbookBBCodeConvertProcess(),
-    'creole' : writing.docbook.text.DocbookCreoleConvertProcess(),
+    'bbcode' : writing.docbook.text.ConvertToBBCodeFilesProcess(),
+    'creole' : writing.docbook.text.ConvertToCreoleFilesProcess(),
     }
 
 #
@@ -51,7 +51,7 @@ def do_docbook_tool(arguments):
         # Add this subparser to the primary parser.
         process_parser = subparsers.add_parser(
             process_name,
-            help=process.help)
+            help=process.get_help())
         process_parser.set_defaults(name=process_name)
 
         # Add the process-specific arguments to the parser.

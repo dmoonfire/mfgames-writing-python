@@ -1,3 +1,6 @@
+"""Contains the base classes for processing from the command-line."""
+
+
 import abc
 import logging
 import os
@@ -43,6 +46,10 @@ class Process(object):
             type=str,
             help="If set, the output for logging goes to the given filename.")
 
+    @abc.abstractmethod
+    def get_help(self):
+        """Returns the help string for the process."""
+        pass
 
 class InputFilesProcess(Process):
     """Defines a process that takes one or more files.
@@ -95,7 +102,7 @@ class ConvertFilesProcess(InputFilesProcess):
         if args.output and len(args.files) != 1:
             raise ProcessError(
                 'The --output option cannot be used with more '
-                + 'than one file.');
+                + 'than one file.')
 
         # If we are using the output, just use that for the output filename
         # and don't bother looping since we know there is exactly one file.
