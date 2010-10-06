@@ -18,8 +18,7 @@ sys.path.append('/usr/share/mfgames-writing')
 sys.path.append('/usr/local/share/mfgames-writing')
 
 # Internal Imports
-import writing.docbook.bbcode
-import writing.docbook.creole
+import writing.docbook.text
 
 #
 # Constants
@@ -32,8 +31,8 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 #
 
 processes = {
-    'bbcode' : writing.docbook.bbcode.DocbookBBCodeConvertProcess(),
-    'creole' : writing.docbook.creole.DocbookCreoleConvertProcess(),
+    'bbcode' : writing.docbook.text.DocbookBBCodeConvertProcess(),
+    'creole' : writing.docbook.text.DocbookCreoleConvertProcess(),
     }
 
 #

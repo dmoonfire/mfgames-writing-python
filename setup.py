@@ -25,7 +25,6 @@ setup(
         ('share/mfgames-writing/writing', [
             'src/writing/__init__.py',
             'src/writing/constants.py',
-            'src/writing/convert.py',
             'src/writing/process.py',
             ]),
         ('share/mfgames-writing/writing/creole', [
@@ -34,8 +33,6 @@ setup(
             ]),
         ('share/mfgames-writing/writing/docbook', [
             'src/writing/docbook/__init__.py',
-            'src/writing/docbook/bbcode.py',
-            'src/writing/docbook/creole.py',
             'src/writing/docbook/text.py',
             ]),
         ],
