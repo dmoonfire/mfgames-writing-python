@@ -12,8 +12,6 @@ class ProcessError(Exception):
 
 
 class Process(object):
-    __metaclass__ = abc.ABCMeta
-
     """Defines the top-level process object used by the script tasks.
 
     The Process class is the base class for all the tasks for the
@@ -32,6 +30,8 @@ class Process(object):
             method. Extending classes should class super before any
             processing of their own.
     """
+
+    __metaclass__ = abc.ABCMeta
 
     def process(self, args):
         """Performs the process on the input arguments."""
@@ -206,7 +206,6 @@ class ConvertFilesProcess(InputFilesProcess):
         if not args.force and os.path.exists(output_filename):
             raise ProcessError(
                 'Output file exists, not converting ' + input_filename)
-            return
 
         # Convert the input file into the output file.
         self.convert_file(args, input_filename, output_filename)

@@ -24,12 +24,8 @@ setup(
     data_files=[
         ('share/mfgames-writing/writing', [
             'src/writing/__init__.py',
-            'src/writing/constants.py',
+            'src/writing/creole.py',
             'src/writing/process.py',
-            ]),
-        ('share/mfgames-writing/writing/creole', [
-            'src/writing/creole/__init__.py',
-            'src/writing/creole/docbook.py',
             ]),
         ('share/mfgames-writing/writing/docbook', [
             'src/writing/docbook/__init__.py',

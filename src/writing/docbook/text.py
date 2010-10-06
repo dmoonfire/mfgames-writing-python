@@ -1,3 +1,6 @@
+"""Handles conversion of DocBook to various text and markup formats."""
+
+
 import abc
 import codecs
 import logging
@@ -79,7 +82,7 @@ class _StructureEntry(object):
 
         # If we don't exist, then just return 0.
         if not self:
-            return 0;
+            return 0
         
         # Otherwise, start at 1 and total up every element that has
         # the same docbook element name as given.
@@ -92,6 +95,8 @@ class _StructureEntry(object):
         return count
 
     def dump_self(self):
+        """Dumps information about the structure itself to stdout."""
+
         attrs = []
 
         if self.number > 0:
@@ -139,6 +144,8 @@ class _StructureEntry(object):
             child.get_subjectsets(subjectsets)
 
     def add_subjectterm(self, schema, term):
+        """Adds a subject term and schema to the entry."""
+
         if not schema:
             schema = None
 
@@ -148,6 +155,8 @@ class _StructureEntry(object):
         self.subjectsets[schema].append(term)
 
     def dump_entry(self):
+        """Recursively dumps data about the structure to stdout."""
+
         self.dump_self()
 
         prefix = '    ' * self.output_depth
@@ -176,12 +185,17 @@ class _StructureScanner(xml.sax.ContentHandler):
         self.depth = 0
         self.capture_buffer = False
         self.buffer = unicode()
+        self.subjectset_schema = None
 
     def characters(self, contents):
+        """Processes character from the XML stream."""
+
         if self.capture_buffer:
             self.buffer += contents
 
     def startElement(self, name, attrs):
+        """Processes the beginning of the XML element."""
+
         if name == "title":
             self.capture_buffer = True
 
@@ -214,6 +228,8 @@ class _StructureScanner(xml.sax.ContentHandler):
             self.capture_buffer = True
 
     def endElement(self, name):
+        """Processes the end of the XML element."""
+
         if name == "title":
             self.entry.title = self.buffer
             self.buffer = unicode()
@@ -245,6 +261,13 @@ class _StructureScanner(xml.sax.ContentHandler):
 
 class ScanDocbookFilesProcess(writing.process.ConvertFilesProcess):
     """Scans the DocBook file and analyzes the structure."""
+
+    def __init__(self):
+        super(ScanDocbookFilesProcess, self).__init__()
+
+        self.args = None
+        self.structure = None
+
     def convert_file(self, args, input_filename, output_filename):
         """
         Converts the given file into Creole.
@@ -294,9 +317,15 @@ class ConvertToTextFilesProcess(
     _log = logging.getLogger('text')
 
     def __init__(self):
+        super(ConvertToTextFilesProcess, self).__init__()
+
         self.structure_index = 0
+        self.structure_output = None
+        self.structure_entry = None
+        self.args = None
         self.buffer = unicode()
         self.output = None
+        self.wrapper = None
 
     def convert_file(self, args, input_filename, output_filename):
         """
@@ -307,9 +336,12 @@ class ConvertToTextFilesProcess(
 
         # If we have chunking, then we need to only have one input file.
         if args.chunk_chapter != 'no' and len(args.files) != 1:
-            self.log.exception('The --chunk option can only be used with '
-                + 'a single file.')
-            return
+            raise writing.process.ProcessError(
+                'The --chunk option can only be used with a single file.')
+
+        if args.columns > 0:
+            self.wrapper = textwrap.TextWrapper()
+            self.wrapper.width = args.columns
 
         # Call the super implementation.
         super(ConvertToTextFilesProcess, self).convert_file(
@@ -357,9 +389,12 @@ class ConvertToTextFilesProcess(
             help="Determines where subject sets will be rendered.")
 
     def characters(self, contents):
+        """Processes a character string in the XML."""
         self.buffer += contents
         
     def startElement(self, name, attrs):
+        """Processes the start of the XML element."""
+
         # Check for structural elements, if we have one, then
         # replace the current entry we are processing.
         if is_structural(name):
@@ -400,6 +435,8 @@ class ConvertToTextFilesProcess(
             self.buffer = unicode()
 
     def endElement(self, name):
+        """Processes the end of an XML element."""
+
         if name == "quote":
             self.append_quote(False)
 
@@ -409,10 +446,14 @@ class ConvertToTextFilesProcess(
             self.buffer = ""
 
     def endDocument(self):
+        """Processes the end of an XML document."""
+
         # If we have an open file, then close it.
         self.close_output()
 
     def append_quote(self, opening):
+        """Appends a normalized quote character to the buffer."""
+
         if self.args.quotes == 'simple':
             self.buffer += '"'
         if self.args.quotes == 'unicode':
@@ -444,6 +485,8 @@ class ConvertToTextFilesProcess(
         self.output.close()
 
     def wrap_buffer(self):
+        """Optionally wraps the output to a given column."""
+
         # Pull out the buffer and clean up the results, removing extra
         # whitespace and filling to the given columns.
         results = self.buffer
@@ -682,5 +725,5 @@ class ConvertToBBCodeFilesProcess(ConvertToTextFilesProcess):
             return
 
         # Beyond this point, we can't handle it in this format.
-        raise ProcessException(
+        raise writing.process.ProcessError(
             "Cannot handle BBCode depth " + structure.output_depth)
