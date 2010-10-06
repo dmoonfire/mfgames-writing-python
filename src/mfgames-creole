@@ -18,7 +18,7 @@ sys.path.append('/usr/share/mfgames-writing')
 sys.path.append('/usr/local/share/mfgames-writing')
 
 # Internal Imports
-import writing.creole.docbook
+import writing.creole
 
 #
 # Constants
@@ -31,7 +31,7 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 #
 
 processes = {
-    'docbook' : writing.creole.docbook.CreoleDocbookConvertProcess(),
+    'docbook' : writing.creole.CreoleDocbookConvertProcess(),
     }
 
 #
@@ -50,7 +50,7 @@ def do_creole_tool(arguments):
         # Add this subparser to the primary parser.
         process_parser = subparsers.add_parser(
             process_name,
-            help=process.help)
+            help=process.get_help())
         process_parser.set_defaults(name=process_name)
 
         # Add the process-specific arguments to the parser.

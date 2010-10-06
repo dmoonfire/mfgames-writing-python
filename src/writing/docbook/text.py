@@ -242,8 +242,52 @@ class _StructureScanner(xml.sax.ContentHandler):
             basename,
             self.process.get_extension())
 
+
+class ScanDocbookFilesProcess(writing.process.ConvertFilesProcess):
+    """Scans the DocBook file and analyzes the structure."""
+    def convert_file(self, args, input_filename, output_filename):
+        """
+        Converts the given file into Creole.
+        """
+
+        self.args = args
+
+        # Go through the file and build up the structural elements of
+        # the document. This is used to determine chunking and file
+        # generation.
+        self.structure = _StructureScanner(self, output_filename)
+        parser = xml.sax.make_parser()
+        parser.setContentHandler(self.structure)
+        parser.parse(open(input_filename))
+
+        if args.dump_structure:
+            print('Dumping Structure')
+            self.structure.root_entry.dump_entry()
+            print('')
+
+    def setup_arguments(self, parser):
+        """Sets up the command-line arguments for DocBook scanning."""
+
+        # Add in the argument from the base class.
+        super(ScanDocbookFilesProcess, self).setup_arguments(parser)
+
+        # Add in the text-specific generations.
+        parser.add_argument(
+            '--chunk-chapter',
+            default='no',
+            type=str,
+            help="If not set to 'no', will chunk at chapters using the "
+                + "value with substituting {id} and {number} in the string.")
+        parser.add_argument(
+            '--dump-structure',
+            default=False,
+            const=True,
+            nargs='?',
+            help="If set, the file structure will be dumped to stdout.") 
+
+
 class ConvertToTextFilesProcess(
-    writing.process.ConvertFilesProcess,
+    ScanDocbookFilesProcess,
     xml.sax.ContentHandler):
     """Basic conversion process for Docbook into various text formats."""
     
@@ -267,19 +311,11 @@ class ConvertToTextFilesProcess(
                 + 'a single file.')
             return
 
-        # Pass 1: Structure
-        # Go through the file and build up the structural elements of
-        # the document. This is used to determine chunking and file
-        # generation.
-        self.structure = _StructureScanner(self, output_filename)
-        parser = xml.sax.make_parser()
-        parser.setContentHandler(self.structure)
-        parser.parse(open(input_filename))
-
-        if args.dump_structure:
-            print('Dumping Structure')
-            self.structure.root_entry.dump_entry()
-            print('')
+        # Call the super implementation.
+        super(ConvertToTextFilesProcess, self).convert_file(
+            args,
+            input_filename,
+            output_filename)
 
         # Pass 2: Output
         # Go through the file and create the actual output based on
@@ -296,22 +332,10 @@ class ConvertToTextFilesProcess(
 
         # Add in the text-specific generations.
         parser.add_argument(
-            '--chunk-chapter',
-            default='no',
-            type=str,
-            help="If not set to 'no', will chunk at chapters using the "
-                + "value with substituting {id} and {number} in the string.")
-        parser.add_argument(
             '--columns',
             default=0,
             type=int,
             help="Sets the number of columns to wrap output.")
-        parser.add_argument(
-            '--dump-structure',
-            default=False,
-            const=True,
-            nargs='?',
-            help="If set, the file structure will be dumped to stdout.") 
         parser.add_argument(
             '--no-newlines',
             dest='newlines',

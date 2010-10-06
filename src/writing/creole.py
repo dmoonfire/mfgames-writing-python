@@ -1,29 +1,19 @@
-#
-# Imports
-#
-
-# System Imports
 import argparse
 import codecs
 import logging
 import os
 import re
 
-# External Imports
 from creoleparser.dialects import *
 from creoleparser.core import *
 from smartypants import smartyPants
 
-# Internal Imports
 import writing.constants
-import writing.convert
 import writing.process
 
-#
-# Creole Parser
-#
 
 BaseParser = creole11_base()
+
 
 class DocbookCreoleParser(BaseParser):
     p = Paragraph('simpara')
@@ -40,12 +30,10 @@ class DocbookCreoleParser(BaseParser):
     nested_ul = NestedList('itemizedlist','*')
 
 
-#
-# Conversion Class
-#
+class CreoleDocbookConvertProcess(writing.process.ConvertFilesProcess):
+    def get_help(self):
+        return 'Converts Creole files into Docbook 5.'
 
-class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
-    help = 'Converts Creole files into Docbook 5.'
     log = logging.getLogger('docbook')
 
     def get_extension(self):
@@ -378,9 +366,6 @@ class CreoleDocbookConvertProcess(writing.convert.ConvertProcess):
         # Return the resulting sections.
         return "".join(results)
 
-#
-# Attribution Parser
-#
 
 class DocbookAttributionParser(object):
     REGEX = r'^(.*?)<blockquote>(.*?)</blockquote>(.*)$'
@@ -447,9 +432,6 @@ class DocbookAttributionParser(object):
         buf.append(contents)
         return "".join(buf)
 
-#
-# Metdata Parser
-#
 
 class DocbookMetadataParser(object):
     # Regular Expressions
@@ -561,9 +543,6 @@ class DocbookMetadataParser(object):
         # Return the resulting string
         return subject
 
-#
-# Paragraph Parser
-#
 
 class DocbookParagraphParser(object):
     PARA_REGEX = r'^(.*)<simpara[^>]*>(NOTE|TIP|WARNING):\s*(.*?)</simpara>(.*)$'
@@ -623,9 +602,6 @@ class DocbookParagraphParser(object):
         # Return the resulting contents
         return contents
 
-#
-# Summary Parser
-#
 
 class DocbookSummaryParser(object):
     SUMMARY_PARA_REGEX = r'^(.*)</info><simpara[^>]*>SUMMARY:\s*(.*?)</simpara>(.*)$'
