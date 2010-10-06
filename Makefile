@@ -3,7 +3,7 @@ PYTHON_NAMESPACES = $(shell grep '.py' setup.py | grep -v 'bin/env' | cut -f 2 -
 
 all:
 
-install:
+install: check
 	python setup.py install
 
 clean:

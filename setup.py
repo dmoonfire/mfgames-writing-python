@@ -29,6 +29,7 @@ setup(
             ]),
         ('share/mfgames-writing/writing/docbook', [
             'src/writing/docbook/__init__.py',
+            'src/writing/docbook/scan.py',
             'src/writing/docbook/text.py',
             ]),
         ],
