@@ -110,6 +110,24 @@ class _StructureEntry(object):
             docbook_id,
             output_filename))
 
+    def get_subjectsets(self, subjectsets):
+        """Combines all the subjectsets from this entry and its children."""
+
+        # Add our subjectesets to the parameter array.
+        for subjectset in self.subjectsets:
+            # Add the key if we don't already have it
+            if subjectset not in subjectsets:
+                subjectsets[subjectset] = []
+
+            # Add all the terms into the resulting object.
+            for subjectterm in self.subjectsets[subjectset]:
+                if subjectterm not in subjectsets[subjectset]:
+                    subjectsets[subjectset].append(subjectterm)
+
+        # Loop through the children and add them to the list
+        for child in self.children:
+            child.get_subjectsets(subjectsets)
+
     def add_subjectterm(self, schema, term):
         if not schema:
             schema = None
@@ -318,8 +336,7 @@ class ConvertToTextFilesProcess(
             # Check to see if we need to open a new output file.
             if self.structure_entry.output_filename:
                 # Close the old file, if we have one
-                if self.output:
-                    self.output.close()
+                self.close_output()
 
                 # Open a new output file and keep the handle.
                 self.buffer = unicode()
@@ -327,6 +344,7 @@ class ConvertToTextFilesProcess(
                     self.structure_entry.output_filename,
                     'w',
                     'utf-8')
+                self.structure_output = self.structure_entry
 
             # Write out the structure header.
             self.write_structure()
@@ -358,15 +376,7 @@ class ConvertToTextFilesProcess(
 
     def endDocument(self):
         # If we have an open file, then close it.
-        if self.output:
-            self.output.close()
-
-        # # If the subjectset position is set at the bottom, give the
-        # # opportunity to write out the tags there.
-        # self._write_subjectsets('document-bottom')
-
-        # if self.args.chunk > 0:
-        #     self.top_context.output.write(os.linesep)
+        self.close_output()
 
     def append_quote(self, opening):
         if self.args.quotes == 'simple':
@@ -376,6 +386,19 @@ class ConvertToTextFilesProcess(
                 self.buffer += unichr(8220)
             else:
                 self.buffer += unichr(8221)
+
+    def close_output(self):
+        """Closes the currently open file, writing out subjectsets if needed."""
+
+        # If we don't have anything open, we don't need to do anything.
+        if not self.output:
+            return
+
+        # Attempt to write out the subjectsets if we have them.
+        self.write_subjectsets_position('document-bottom')
+
+        # Close the handle to the file.
+        self.output.close()
 
     def wrap_buffer(self):
         # Pull out the buffer and clean up the results, removing extra
@@ -414,6 +437,9 @@ class ConvertToTextFilesProcess(
     def write_structure_header(self, structure):
         """Writes out the header for the structure entry."""
 
+    def write_subjectsets(self, subjectsets):
+        """Writes out the subjectsets to the output."""
+
     def write_subjectsets_position(self, position):
         """Writes out the subjectsets if they are in the right position.
 
@@ -423,24 +449,52 @@ class ConvertToTextFilesProcess(
         arguments.
         """
 
-        # If we don't have any subject sets, then don't bother doing
-        # anything.
-        if len(self.structure_entry.subjectsets) == 0:
-            return
-
         # Check the position given and see if it matches the position
         # given in the arguments. If they don't match, then we won't
         # be writing out the subjectsets.
         if position != self.args.subjectset_position:
             return
 
+        # If we are a document-level position, then we need to gather
+        # up all the subjectsets from this level and its
+        # children. Otherwise, we just get it from the current
+        # structure element.
+        if position == 'document-bottom':
+            subjectsets = {}
+            self.structure_output.get_subjectsets(subjectsets)
+        else:
+            subjectsets = self.structure_entry.subjectsets
+
+        # If we don't have any subject sets, then don't bother doing
+        # anything.
+        if len(subjectsets) == 0:
+            return
+
         # We are in the right position and we have at least one parsed
         # subject set, so allow the derived parser to generate it.
-        #self.write_subjectsets(self._subjectsets)
+        self.write_newline()
+        self.write_subjectsets(subjectsets)
 
 
 class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
     """Handles the conversion from DocBook to Creole."""
+
+    def setup_arguments(self, parser):
+        """
+        Sets up the command-line arguments for the Docbook to Creole
+        conversion.
+        """
+
+        # Add in the argument from the base class.
+        super(ConvertToCreoleFilesProcess, self).setup_arguments(parser)
+
+        # Add the Creole-conversion specific processes.
+        parser.add_argument(
+            '--subjectset-format',
+            default='none',
+            choices=['none', 'list', 'dokuwiki-tags'],
+            type=str,
+            help='Determines how subject sets are formatted.')
 
     def get_extension(self):
         """Defines the BBCode extension as .bbcode"""
@@ -464,6 +518,52 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
             '=' * (structure.output_depth + 1),
             structure.title))
         self.output.write(os.linesep)
+
+    def write_subjectsets(self, subjectsets):
+        """Writes out the subjectsets to the output."""
+
+        # If we are in the list format, just write it out as a
+        # recursive list.
+        if self.args.subjectset_format == 'list':
+            # Write out the default items first, if we have them.
+            if None in subjectsets:
+                for subjectterm in subjectsets[None]:
+                    self.output.write('* ' + subjectterm)
+                    self.output.write(os.linesep)
+
+            # Sort the list of remaining keys, which won't include the
+            # None default key.
+            keys = subjectsets.keys()
+            keys.sort()
+
+            for subjectset in subjectsets.keys():
+                if subjectset:
+                    # Write out the schema for the subject.
+                    self.output.write('* ' + subjectset)
+                    self.output.write(os.linesep)
+
+                    # Write out the terms.
+                    for subjectterm in subjectsets[subjectset]:
+                        self.output.write('** ' + subjectterm)
+                        self.output.write(os.linesep)
+
+        # If we are doing Dokuwiki Tags, write them out.
+        if self.args.subjectset_format == 'dokuwiki-tags':
+            # Create a single list of all the tags at this point.
+            tags = []
+
+            for schema in subjectsets.keys():
+                for term in subjectsets[schema]:
+                    if term not in tags:
+                        # If the tag has a _, it will be changed back
+                        # to a space character.
+                        tags.append(term.replace(' ', '_'))
+
+            # Create the dokuwiki tags.
+            self.output.write("{{tag>")
+            self.output.write(" ".join(sorted(tags)))
+            self.output.write("}}")
+            self.output.write(os.linesep)
 
 
 class ConvertToBBCodeFilesProcess(ConvertToTextFilesProcess):
