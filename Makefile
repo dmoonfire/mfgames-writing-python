@@ -15,5 +15,5 @@ check:
 		--include-ids=yes \
 		--disable-msg=R0904,C0103,R0902,R0201,R0903,R0915,R0914 \
 		$(PYTHON_FILES) 2> /dev/null
-	# PYTHONPATH=src PYTHONVER=2.6 pychecker \
-	# 	$(PYTHON_FILES)
+#	 PYTHONPATH=src PYTHONVER=2.6 pychecker \
+# 		$(PYTHON_FILES)

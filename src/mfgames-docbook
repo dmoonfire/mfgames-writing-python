@@ -33,6 +33,7 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 processes = {
     'bbcode' : writing.docbook.text.ConvertToBBCodeFilesProcess(),
     'creole' : writing.docbook.text.ConvertToCreoleFilesProcess(),
+    'extract-subjectsets' : writing.docbook.scan.ExtractSubjectsetsProcess(),
     }
 
 #
