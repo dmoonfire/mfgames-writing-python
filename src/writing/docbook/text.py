@@ -9,7 +9,6 @@ import re
 import textwrap
 import xml.sax
 
-import writing.constants
 import writing.process
 import writing.docbook.scan
 

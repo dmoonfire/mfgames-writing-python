@@ -4,6 +4,8 @@ PYTHON_NAMESPACES = $(shell grep '.py' setup.py | grep -v 'bin/env' | cut -f 2 -
 all:
 
 install: check
+	rm -rf build
+	rm -rf /usr/local/share/mfgames-writing
 	python setup.py install
 
 clean:
@@ -15,5 +17,5 @@ check:
 		--include-ids=yes \
 		--disable-msg=R0904,C0103,R0902,R0201,R0903,R0915,R0914 \
 		$(PYTHON_FILES) 2> /dev/null
-#	 PYTHONPATH=src PYTHONVER=2.6 pychecker \
-# 		$(PYTHON_FILES)
+
+	test/run_tests.py

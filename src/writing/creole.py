@@ -544,12 +544,15 @@ class DocbookMetadataParser(object):
         Create a subject XML fragment and return the results.
         """
 
-        # Split on the semicolon for the subjectset.
+        # Split on the semicolon for the subjectset. We need to escape the
+        # character entities, if they exist, to avoid splitting on them.
+        value = re.sub(r'(&#?\d+);', r'\1\tunicode\t', value)
         split_terms = re.split(r'\s*;\s*', value)
 
         # Create a fragment with the subject.
         terms = "</subjectterm></subject><subject><subjectterm>" \
             .join(split_terms)
+        terms = terms.replace('\tunicode\t', ';')
         subject = "".join([
             '<subjectset schema="',
             key,
@@ -618,7 +621,7 @@ class DocbookParagraphParser(object):
 
         for para_type in types:
             tags = "".join(['</', para_type, '><', para_type, '>'])
-            contents = contents.replace(contents, tags, '')
+            contents = contents.replace(tags, '')
 
         # Return the resulting contents
         return contents

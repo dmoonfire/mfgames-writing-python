@@ -1,10 +1,11 @@
 """Handles processing of DocBook files for additional information."""
 
 
+import codecs
 import os
+import sys
 import xml.sax
 
-import writing.constants
 import writing.process
 
 
@@ -323,14 +324,23 @@ class ExtractSubjectsetsProcess(writing.process.InputFilesProcess):
 
         super(ExtractSubjectsetsProcess, self).process(args)
 
+        self.args = args
+
+        # Figure out the output, if we have one.
+        if args.output:
+            output = codecs.open(
+                args.output,
+                'w',
+                'utf-8')
+        else:
+            output = sys.stdout
+
         # Go through all the input files.
         for filename in args.files:
-            self.process_file(args, filename)
+            self.process_file(args, filename, output)
 
-    def process_file(self, args, input_filename):
+    def process_file(self, args, input_filename, output):
         """Converts the given file into Creole."""
-
-        self.args = args
 
         # Go through the file and build up the structural elements of
         # the document. This is used to determine chunking and file
@@ -339,8 +349,6 @@ class ExtractSubjectsetsProcess(writing.process.InputFilesProcess):
         parser = xml.sax.make_parser()
         parser.setContentHandler(self.structure)
         parser.parse(open(input_filename))
-
-        self.structure.root_entry.dump_entry()
 
         # Get all the subjects from the root element.
         subjectsets = {}
@@ -361,7 +369,8 @@ class ExtractSubjectsetsProcess(writing.process.InputFilesProcess):
                         input_filename,
                         setname,
                         subjectterm]
-                    print '\t'.join(parts)
+                    output.write('\t'.join(parts))
+                    output.write(os.linesep)
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""
@@ -370,6 +379,10 @@ class ExtractSubjectsetsProcess(writing.process.InputFilesProcess):
         super(ExtractSubjectsetsProcess, self).setup_arguments(parser)
 
         # Add in the text-specific generations.
+        parser.add_argument(
+            '--output',
+            type=str,
+            help="Output file otherwise use stdout.")
         parser.add_argument(
             '--output-format',
             default='tsv',

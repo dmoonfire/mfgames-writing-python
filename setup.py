@@ -13,7 +13,7 @@ from distutils.core import setup
 
 setup(
     name='mfgames-writing',
-    version='0.0.0.0',
+    version='0.0.0.1',
     description='Utilities for text-base writing.',
     author='D. Moonfire',
     url='http://mfgames.com/mfgames-writing',
