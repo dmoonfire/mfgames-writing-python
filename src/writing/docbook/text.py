@@ -74,10 +74,7 @@ class ConvertToTextFilesProcess(
             help="Sets the number of columns to wrap output.")
         parser.add_argument(
             '--no-newlines',
-            dest='newlines',
-            const=False,
-            default=True,
-            nargs='?',
+            action='store_true',
             help="If set, no newlines will be generated between paragraphs.")
         parser.add_argument(
             '--quotes',
@@ -206,7 +203,7 @@ class ConvertToTextFilesProcess(
     def write_newline(self):
         """Writes out a newline if there should be one."""
         
-        if self.args.newlines:
+        if self.args.no_newlines:
             self.output.write(os.linesep)
 
     def write_structure(self):
@@ -307,7 +304,7 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
             return
 
         # Write out the header according to the WikiCreole format.
-        self.output.write('{0} {1} {0}'.format(
+        self.output.write(u'{0} {1} {0}'.format(
             '=' * (structure.output_depth + 1),
             structure.title))
         self.output.write(os.linesep)
