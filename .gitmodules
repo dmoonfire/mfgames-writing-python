@@ -1,0 +1,3 @@
+[submodule "lib/mfgames-tools-python"]
+	path = lib/mfgames-tools-python
+	url = git@github.com:dmoonfire/mfgames-tools-python.git
