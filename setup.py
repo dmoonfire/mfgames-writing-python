@@ -13,7 +13,7 @@ from distutils.core import setup
 
 setup(
     name='mfgames-writing',
-    version='0.0.0.1',
+    version='0.0.1.0',
     description='Utilities for text-base writing.',
     author='D. Moonfire',
     url='http://mfgames.com/mfgames-writing',
@@ -22,10 +22,13 @@ setup(
         'src/mfgames-docbook',
         ],
     data_files=[
+        ('share/mfgames-writing/tools', [
+            'src/tools/__init__.py',
+            'src/tools/process.py',
+            ]),
         ('share/mfgames-writing/writing', [
             'src/writing/__init__.py',
             'src/writing/creole.py',
-            'src/writing/process.py',
             ]),
         ('share/mfgames-writing/writing/docbook', [
             'src/writing/docbook/__init__.py',
