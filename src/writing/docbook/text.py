@@ -9,7 +9,7 @@ import re
 import textwrap
 import xml.sax
 
-import writing.process
+import tools.process
 import writing.docbook.scan
 
 
@@ -40,7 +40,7 @@ class ConvertToTextFilesProcess(
 
         # If we have chunking, then we need to only have one input file.
         if args.chunk_chapter != 'no' and len(args.files) != 1:
-            raise writing.process.ProcessError(
+            raise tools.process.ProcessError(
                 'The --chunk option can only be used with a single file.')
 
         if args.columns > 0:
@@ -426,5 +426,5 @@ class ConvertToBBCodeFilesProcess(ConvertToTextFilesProcess):
             return
 
         # Beyond this point, we can't handle it in this format.
-        raise writing.process.ProcessError(
+        raise tools.process.ProcessError(
             "Cannot handle BBCode depth " + structure.output_depth)

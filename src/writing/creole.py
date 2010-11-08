@@ -9,8 +9,8 @@ import creoleparser.dialects
 import creoleparser.core
 import smartypants
 
+import tools.process
 import writing
-import writing.process
 
 
 BaseParser = creoleparser.dialects.creole11_base()
@@ -37,7 +37,7 @@ class DocbookCreoleParser(BaseParser):
     nested_ul = creoleparser.dialects.NestedList('itemizedlist', '*')
 
 
-class CreoleDocbookConvertProcess(writing.process.ConvertFilesProcess):
+class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
     """Process for converting Creole files to DocBook."""
 
     def get_help(self):

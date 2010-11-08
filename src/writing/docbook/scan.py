@@ -6,7 +6,7 @@ import os
 import sys
 import xml.sax
 
-import writing.process
+import tools.process
 
 
 def is_structural(name):
@@ -255,7 +255,7 @@ class _StructureScanner(xml.sax.ContentHandler):
             self.process.get_extension())
 
 
-class ScanDocbookFilesProcess(writing.process.ConvertFilesProcess):
+class ScanDocbookFilesProcess(tools.process.ConvertFilesProcess):
     """Scans the DocBook file and analyzes the structure."""
 
     def __init__(self):
@@ -305,7 +305,7 @@ class ScanDocbookFilesProcess(writing.process.ConvertFilesProcess):
             help="If set, the file structure will be dumped to stdout.") 
 
 
-class ExtractSubjectsetsProcess(writing.process.InputFilesProcess):
+class ExtractSubjectsetsProcess(tools.process.InputFilesProcess):
     """Scans the DocBook file and extracts the subject sets."""
 
     def __init__(self):
