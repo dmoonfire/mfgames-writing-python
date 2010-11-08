@@ -2,6 +2,7 @@
 *.pyc
 *.results
 *.log
+*.html
 
 build
 

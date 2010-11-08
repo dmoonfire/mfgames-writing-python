@@ -1,0 +1,64 @@
+<article xmlns='http://docbook.org/ns/docbook' version='5'>
+  <info>
+    <title>Moonfire Games' Writing Toolkit</title>
+  </info>
+
+  <para>
+    The Moonfire Games' Writing Toolkit (mfgames-writing) is a
+    collection of small, relatively specialized utilities for
+    converting, analyzing, and processing various file formats that
+    are useful in the process of short-story and novel writing. The
+    bulk of the program's functionality is centered around the DocBook
+    5 XML format as a general purpose file format that is easily
+    converted into other, more specific formats. The other utilities
+    work at converting file formats into and from DocBook 5.
+  </para>
+
+  <para>
+  </para>
+
+  <section>
+    <info>
+      <title>Introduction</title>
+    </info>
+
+    <para>
+      The intended use of these utilities are to allow an author to
+      use a relatively simple file format, such as Creole or Markdown,
+      to create the bulk of the writing. This allows them to use a
+      variety of applications, such as Emacs, Notepad++, or any other
+      text-based editor, without worrying about the formatting or
+      layout. Then, using these utilities, the writer can convert the
+      files into DocBook and either use that as an interim conversion
+      format or to perform various analysis on the resulting file.
+    </para>
+
+    <para>
+      Using DocBook as an interim format, stories can be formatted for
+      posting on various websites or forums that have different
+      formatting guidelines such as BBCode or pure text. Controls for
+      word-wrapping and section breaks simplifies the process of
+      distributing stories and novels.
+    </para>
+
+    <para>
+      These utilities can also be used to convert DocBook into
+      Wiki-based (Creole for example) markup for automated updating of
+      websites or to produce an online version of a story or
+      author. This takes the idea of the HTML chunked output of
+      DocBook and expands it into other text formats.
+    </para>
+  </section>
+
+  <section>
+    <info>
+      <title>DocBook</title>
+    </info>
+  </section>
+
+  <section>
+    <info>
+      <title>Creole</title>
+    </info>
+  </section>
+</article>
