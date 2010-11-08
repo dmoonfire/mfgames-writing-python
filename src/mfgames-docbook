@@ -30,17 +30,18 @@ LOG_FORMAT = "%(asctime)-15s %(message)s"
 # Processes
 #
 
-processes = {
-    'bbcode' : writing.docbook.text.ConvertToBBCodeFilesProcess(),
-    'creole' : writing.docbook.text.ConvertToCreoleFilesProcess(),
-    'extract-subjectsets' : writing.docbook.scan.ExtractSubjectsetsProcess(),
-    }
-
 #
 # Execution
 #
 
 def do_docbook_tool(arguments):
+    # Set up the processes.
+    processes = {
+        'bbcode': writing.docbook.text.ConvertToBBCodeFilesProcess(),
+        'creole': writing.docbook.text.ConvertToCreoleFilesProcess(),
+        'extract-subjectsets': writing.docbook.scan.ExtractSubjectsetsProcess(),
+        }
+
     # Set up the primary parser.
     parser = argparse.ArgumentParser(
         description='Manipulate and convert DocBook 5 documents.')

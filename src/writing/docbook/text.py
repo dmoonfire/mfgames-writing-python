@@ -125,12 +125,8 @@ class ConvertToTextFilesProcess(
 
         # Handle paragraphs and simple paragraphs
         if name == "simpara" or name == "para":
-            # But a blank line before the paragraph.
+            # Write a blank line before the paragraph.
             self.write_newline()
-
-            # Give the opportunity for the parser to write out the
-            # subjectset information at the top of the section.
-            self.write_subjectsets_position('section-top')
 
             # Clear the buffer
             self.buffer = unicode()
@@ -203,7 +199,7 @@ class ConvertToTextFilesProcess(
     def write_newline(self):
         """Writes out a newline if there should be one."""
         
-        if self.args.no_newlines:
+        if not self.args.no_newlines:
             self.output.write(os.linesep)
 
     def write_structure(self):
@@ -304,7 +300,7 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
             return
 
         # Write out the header according to the WikiCreole format.
-        self.output.write(u'{0} {1} {0}'.format(
+        self.output.write(u'{0} {1}'.format(
             '=' * (structure.output_depth + 1),
             structure.title))
         self.output.write(os.linesep)
@@ -323,17 +319,14 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
 
             # Sort the list of remaining keys, which won't include the
             # None default key.
-            keys = subjectsets.keys()
-            keys.sort()
-
-            for subjectset in subjectsets.keys():
+            for subjectset in sorted(subjectsets.keys()):
                 if subjectset:
                     # Write out the schema for the subject.
                     self.output.write('* ' + subjectset)
                     self.output.write(os.linesep)
 
                     # Write out the terms.
-                    for subjectterm in subjectsets[subjectset]:
+                    for subjectterm in sorted(subjectsets[subjectset]):
                         self.output.write('** ' + subjectterm)
                         self.output.write(os.linesep)
 

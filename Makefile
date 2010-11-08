@@ -18,4 +18,4 @@ check:
 		--disable-msg=R0904,C0103,R0902,R0201,R0903,R0915,R0914 \
 		$(PYTHON_FILES) 2> /dev/null
 
-	test/run_tests.py
+	cd test && PYTHONPATH=../src ./run_tests.py

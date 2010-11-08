@@ -1,9 +1,14 @@
 = Long Paragraph
-* Schema1: Term1; Term2
+
+* Schema1
+** Term1
+** Term2
 
 This is a long paragraph because it spans across multiple lines and needs to be converted into a single paragraph inside the DocBook 5 file. When it does this, it will lose the newlines.
 
 == Heading 2
-* Schema2: Term3
+
+* Schema2
+** Term3
 
 This is a second long paragraph. It also spans across multiple lines and will produce the correct output in DocBook 5.
