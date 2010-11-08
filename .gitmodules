@@ -1,3 +1,3 @@
-[submodule "lib/mfgames-tools-python"]
-	path = lib/mfgames-tools-python
+[submodule "src/tools"]
+	path = src/tools
 	url = git@github.com:dmoonfire/mfgames-tools-python.git
