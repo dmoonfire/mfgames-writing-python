@@ -14,9 +14,6 @@
     work at converting file formats into and from DocBook 5.
   </para>
 
-  <para>
-  </para>
-
   <section>
     <info>
       <title>Introduction</title>
@@ -36,7 +33,7 @@
     <para>
       Using DocBook as an interim format, stories can be formatted for
       posting on various websites or forums that have different
-      formatting guidelines such as BBCode or pure text. Controls for
+      posting guidelines such as BBCode or pure text. Controls for
       word-wrapping and section breaks simplifies the process of
       distributing stories and novels.
     </para>
@@ -45,8 +42,9 @@
       These utilities can also be used to convert DocBook into
       Wiki-based (Creole for example) markup for automated updating of
       websites or to produce an online version of a story or
-      author. This takes the idea of the HTML chunked output of
-      DocBook and expands it into other text formats.
+      author. With novels, longer pieces can be <quote>chunked</quote>
+      so each chapter appears on a different page with links between
+      them.
     </para>
   </section>
 
@@ -54,6 +52,32 @@
     <info>
       <title>DocBook</title>
     </info>
+
+    <para>
+      The system uses DocBook 5 as a common format for producing
+      stories and novels. There are already well-known transformers
+      for converting DocBook into ePUB, HTML, PDF, and a variety of
+      other formats. However, the additional tags and requirement for
+      XML correctness makes it difficult to edit DocBook directly
+      without the use of a dedicated editor.
+    </para>
+
+    <para>
+      All of the DocBook analysis and conversion use
+      the <command>mfgames-docbook</command> script. The first
+      parameter of the script determine the function. For example, to
+      convert DocBook into BBCode uses <command>mfgames-docbook
+      bbcode</command>.
+    </para>
+
+    <section>
+      <info>
+	<title>Conversion</title>
+      </info>
+
+      <para>
+	The following formats
+      </para>
   </section>
 
   <section>
