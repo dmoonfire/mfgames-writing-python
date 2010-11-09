@@ -50,6 +50,77 @@
 
   <section>
     <info>
+      <title>Conversion</title>
+    </info>
+
+    <para>
+      All conversions share a number of options. Conversions all
+      take one or more input files and produce output files based
+      on the format and input structure.
+    </para>
+    
+    <variablelist>
+      <varlistentry>
+	<term><option>-d DIRECTORY</option></term>
+	<term><option>--directory DIRECTORY</option></term>
+	<listitem>
+	  <para>
+	    If set, this will create the output files in the give
+	    directory instead of the same directory as the input
+	    file.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>-e EXTENSION</option></term>
+	<term><option>--extension EXTENSION</option></term>
+	<listitem>
+	  <para>
+	    If set, this will create files with the output of the
+	    given extension. For example, providing <option>-e
+	      txt</option> will create files ending
+	    in <filename>.txt</filename>. If omitted, the extension
+	    will be based on the format.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>-f</option></term>
+	<term><option>--force</option></term>
+	<listitem>
+	  <para>
+	    If the output file exists, it will not be overwritten
+	    unless this option is included.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>-o OUTPUT</option></term>
+	<term><option>--output OUTPUT</option></term>
+	<listitem>
+	  <para>
+	    If provided, the output file will be exactly the output
+	    given. If omitted, the output file will have the same
+	    base name as the input file and a format-specific
+	    extension.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--relative-root RELATIVE-ROOT</option></term>
+	<listitem>
+	  The relative root option strips off RELATIVE-ROOT from the
+	  prefix of the file name, and then creates a directory
+	  structure with the remaining components. This is used with
+	  the <option>--directory</option> to mirror a structure of
+	  output files that matches the input directory tree.
+	</listitem>
+      </varlistentry>
+    </variablelist>
+  </section>
+
+  <section>
+    <info>
       <title>DocBook</title>
     </info>
 
@@ -67,22 +138,269 @@
       the <command>mfgames-docbook</command> script. The first
       parameter of the script determine the function. For example, to
       convert DocBook into BBCode uses <command>mfgames-docbook
-      bbcode</command>.
+	bbcode</command>.
     </para>
 
     <section>
       <info>
-	<title>Conversion</title>
+	<title>Text Conversion</title>
       </info>
-
+      
       <para>
-	The following formats
+	The following formats allow conversion from DocBook into a
+	text-based format.
       </para>
-  </section>
+      
+      <variablelist>
+	<varlistentry>
+	  <term>BBCode</term>
+	  <listitem>
+	    <para>
+	      Conversion to BBCode-formatted text. This
+	      uses <command>mfgames-docbook bbcode</command>.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term>Creole</term>
+	  <listitem>
+	    <para>
+	      Conversion to Creole, a semi-standardized Wiki
+	      markup language. This uses <command>mfgames-docbook
+		creole</command>.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+      
+      <para>
+	In all of these cases, the text formats are not XML-based
+	markup languages and require various other processes to
+	transform DocBook into the required format.
+      </para>
+      
+      <para>
+	All of the text-base conversions share the following options:
+      </para>
+      
+      <variablelist>
+	<varlistentry>
+	  <term><option>--chunk-chapter {spec}</option></term>
+	  <listitem>
+	    <para>
+	      This option, when set, will chunk a document at the
+	      chapter elements. The name of the file will
+	      be <quote>spec</quote> with the format-specific
+	      extension (e.g., <filename>.creole</filename> for Creole
+	      conversion).
+	    </para>
+	    
+	    <para>
+	      The specification has a number of substitution
+	      variables. Putting <quote>{id}</quote> in the
+	      specification will put the XML ID attribute for the
+	      chapter. Furthermore, <quote>{number}</quote> will put
+	      the 1-based number of the chapter. For example,
+	      converting to Creole with <quote>--chunk-chapter
+		"ch{number}"</quote> will
+	      create <filename>ch1.creole</filename>, <filename>ch2.creole</filename>,
+	      etc.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><option>--columns #</option></term>
+	  <listitem>
+	    <para>
+	      Setting this to a non-zero number will word-wrap the
+	      output to that column. Setting to zero (also the
+	      default), then the entire paragraph will be placed on
+	      a single text line regardless of the actual lines used
+	      within the DocBook file.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><option>--no-newlines</option></term>
+	  <listitem>
+	    <para>
+	      If this flag is missing, then blank lines will be put
+	      between each of the paragraphs. Otherwise, newlines
+	      between paragraphs will be excluded.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><option>--quotes {simple|unicode}</option></term>
+	  <listitem>
+	    <para>
+	      If quotes are set to simple, then straight quotes will
+	      be used for &lt;quote/&gt; tags. If set to unicode,
+	      then <quote>fancy quotes</quote> will be used.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><option>
+	      --subjectset-position
+	      {none|section-top|document-bottom}
+	  </option></term>
+	  <listitem>
+	    <para>
+	      This option determines where subjectsets will be
+	      displayed in the output file. The default "none" is to
+	      ignore subjectsets in the output. Setting this to
+	      section-top will place all the subjectsets in the
+	      given section at the top of the section
+	      while <quote>document-bottom</quote> will gather up
+	      all the subjectsets and place them in the bottom.
+	    </para>
+	    
+	    <para>
+	      The format of the subjectsets are controlled by
+	      the <option>--subjectset-format</option> option.
+	    </para>
+	  </listitem>
+	</varlistentry>
+	<varlistentry>
+	  <term><option>--subjectset-format {none|list}</option></term>
+	  <listitem>
+	    <para>
+	      The default is not to format subjectsets. If this is
+	      set to list, then the subjectsets will be converted
+	      into a bullet list with the first level being the
+	      schemas and the second being the individual terms of
+	      each subjectset.
+	    </para>
 
+	    <para>
+	      The <option>creole</option> format include an
+	      additional subjectset
+	      format: <option>dokuwiki-tags</option> which formats
+	      it according to the tag plugin for DokuWiki.
+	    </para>
+	  </listitem>
+	</varlistentry>
+      </variablelist>
+    </section>
+  </section>
+  
   <section>
     <info>
       <title>Creole</title>
     </info>
+
+    <para>
+      The only function of <command>mfgames-creole</command> is to
+      convert Creole files into DocBook format. This uses the same
+      conversion options as the rest of the system, but also uses
+      the following:
+    </para>
+
+    <variablelist>
+      <varlistentry>
+	<term><option>--id ID</option></term>
+	<listitem>
+	  <para>
+	    Assigns the id to the top-level generated DocBook
+            element.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--ignore-localwords</option></term>
+	<listitem>
+	  <para>
+	    Strips out paragraphs starting
+	    with <quote>LocalWords:</quote> which is used for
+	    buffer-specific dictionaries in Emacs.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--number-paragraphs</option></term>
+	<listitem>
+	  <para>
+	    Numbers the paragraphs in the resulting XML. This is
+	    done as an XML attribute with a different namespace and
+	    useful for XML processing.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--parse-attributions</option></term>
+	<listitem>
+	  <para>
+	    Parses attributions in blockquotes. Attributions are in
+	    the format of <quote>-- Attribution</quote> at the end
+	    of the blockquote. With this, they will be converted
+	    into DocBook attributes.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--parse-backticks</option></term>
+	<listitem>
+	  <para>
+	    Converts backticks (`phrase`) into foreign phrases.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--parse-languages</option></term>
+	<listitem>
+	  <para>
+	    Converts language tags into xml:lang attributes. A
+	    language tag is added inside a quote or foreign phrase
+	    (see <option>--parse-backticks</option>) and have a
+	    number of letters followed by a colon with some optional
+	    whitespace. For example, "jpn: arigto" will be converted
+	    into a quote tag with xml:lang="jpn" as an attribute.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--parse-metadata</option></term>
+	<listitem>
+	  <para>
+	    Processes itemized lists below section and article
+	    headings as metadata.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--parse-special-paragraphs</option></term>
+	<listitem>
+	  <para>
+	    Parses special paragraph types into container
+	    objects. Special paragraphs that have "NOTE:" or "TIP:"
+	    will be converted into the appropriate tags. Sequential
+	    special paragraphs with the same prefix will be combined
+	    together.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--parse-summaries</option></term>
+	<listitem>
+	  <para>
+	    Parses the summary paragraphs as abstract tags. These
+	    paragraphs start with "SUMMARY:" much like special
+	    paragraphs.
+	  </para>
+	</listitem>
+      </varlistentry>
+      <varlistentry>
+	<term><option>--root-element {article,chapter}</option></term>
+	<listitem>
+	  <para>
+	    Determines the root element for converted files. The
+	    default is to have an &lt;article&gt; tag in the
+	    beginning, but changing this to chapter will create
+	    chapter tags instead.
+	  </para>
+	</listitem>
+      </varlistentry>
+    </variablelist>
   </section>
 </article>
