@@ -145,7 +145,9 @@ class ConvertToTextFilesProcess(
             self.buffer += "//"
 
         # Handle list elements.
-        if name == "itemizedlist" or name == "orderedlist" or name == "variablelist" or name == "varlistentry" or name == "listitem":
+        if (name == "itemizedlist" or name == "orderedlist"
+            or name == "variablelist" or name == "varlistentry"
+            or name == "listitem"):
             prefix = self.get_line_prefix(name)
 
             if prefix:
@@ -179,7 +181,9 @@ class ConvertToTextFilesProcess(
             self.buffer += "//"
 
         # Handle list elements.
-        if name == "itemizedlist" or name == "orderedlist" or name == "variablelist" or name == "varlistentry" or name == "listitem":
+        if (name == "itemizedlist" or name == "orderedlist"
+            or name == "variablelist" or name == "varlistentry"
+            or name == "listitem"):
             prefix = self.get_line_prefix(name)
 
             if prefix:
@@ -229,6 +233,9 @@ class ConvertToTextFilesProcess(
 
     def get_line_prefix(self, element):
         """Returns the line prefix string for a given element name."""
+        if element == "itemizedlist":
+            return None
+
         return None
 
     def wrap_buffer(self):
