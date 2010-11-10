@@ -30,6 +30,9 @@ class ConvertToTextFilesProcess(
         self.buffer = unicode()
         self.output = None
         self.wrapper = None
+        self.line_prefix = ''
+        self.supress_newline = False
+        self.path = []
 
     def convert_file(self, args, input_filename, output_filename):
         """
@@ -96,6 +99,9 @@ class ConvertToTextFilesProcess(
     def startElement(self, name, attrs):
         """Processes the start of the XML element."""
 
+        # Add the element to the path.
+        self.path.append(name)
+
         # Check for structural elements, if we have one, then
         # replace the current entry we are processing.
         if writing.docbook.scan.is_structural(name):
@@ -131,16 +137,56 @@ class ConvertToTextFilesProcess(
             # Clear the buffer
             self.buffer = unicode()
 
+        # Handle some of the inline tag.
+        if name == "command":
+            self.buffer += "**"
+
+        if name == "option":
+            self.buffer += "//"
+
+        # Handle list elements.
+        if name == "itemizedlist" or name == "orderedlist" or name == "variablelist" or name == "varlistentry" or name == "listitem":
+            prefix = self.get_line_prefix(name)
+
+            if prefix:
+                self.line_prefix += prefix
+
+        if name == "listitem" or name == "term":
+            self.supress_newline = True
+
+        if name == "term":
+            self.buffer = unicode()
+
     def endElement(self, name):
         """Processes the end of an XML element."""
 
         if name == "quote":
             self.append_quote(False)
 
-        if name == "simpara" or name == "para":
+        if name == "simpara" or name == "para" or name == "term":
+            if self.line_prefix:
+                self.output.write(self.line_prefix)
+
             self.output.write(self.wrap_buffer())
             self.output.write(os.linesep)
             self.buffer = ""
+
+        # Handle some of the inline tag.
+        if name == "command":
+            self.buffer += "**"
+
+        if name == "option":
+            self.buffer += "//"
+
+        # Handle list elements.
+        if name == "itemizedlist" or name == "orderedlist" or name == "variablelist" or name == "varlistentry" or name == "listitem":
+            prefix = self.get_line_prefix(name)
+
+            if prefix:
+                self.line_prefix = self.line_prefix[:-len(prefix)]
+
+        # Remove the element to the path.
+        self.path.pop()
 
     def endDocument(self):
         """Processes the end of an XML document."""
@@ -181,6 +227,10 @@ class ConvertToTextFilesProcess(
         # Close the handle to the file.
         self.output.close()
 
+    def get_line_prefix(self, element):
+        """Returns the line prefix string for a given element name."""
+        return None
+
     def wrap_buffer(self):
         """Optionally wraps the output to a given column."""
 
@@ -199,6 +249,10 @@ class ConvertToTextFilesProcess(
     def write_newline(self):
         """Writes out a newline if there should be one."""
         
+        if self.supress_newline:
+            self.supress_newline = False
+            return
+
         if not self.args.no_newlines:
             self.output.write(os.linesep)
 
@@ -285,6 +339,23 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
     def get_extension(self):
         """Defines the BBCode extension as .bbcode"""
         return "creole"
+
+    def get_line_prefix(self, element):
+        """Returns the line prefix string for a given element name."""
+
+        if element == "itemizedlist":
+            return "*"
+
+        if element == "orderedlist":
+            return "#"
+
+        if element == "variablelist":
+            return "*"
+
+        if element == "listitem" and self.path[-2] == "varlistentry":
+            return "*"
+
+        return None
 
     def get_help(self):
         """Contains the help string for the process."""

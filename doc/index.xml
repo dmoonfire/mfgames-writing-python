@@ -192,17 +192,13 @@
 	      chapter elements. The name of the file will
 	      be <quote>spec</quote> with the format-specific
 	      extension (e.g., <filename>.creole</filename> for Creole
-	      conversion).
-	    </para>
-	    
-	    <para>
-	      The specification has a number of substitution
-	      variables. Putting <quote>{id}</quote> in the
-	      specification will put the XML ID attribute for the
+	      conversion). The specification has a number of
+	      substitution variables. Putting <quote>{id}</quote> in
+	      the specification will put the XML ID attribute for the
 	      chapter. Furthermore, <quote>{number}</quote> will put
 	      the 1-based number of the chapter. For example,
 	      converting to Creole with <quote>--chunk-chapter
-		"ch{number}"</quote> will
+	      "ch{number}"</quote> will
 	      create <filename>ch1.creole</filename>, <filename>ch2.creole</filename>,
 	      etc.
 	    </para>
@@ -250,14 +246,11 @@
 	      This option determines where subjectsets will be
 	      displayed in the output file. The default "none" is to
 	      ignore subjectsets in the output. Setting this to
-	      section-top will place all the subjectsets in the
-	      given section at the top of the section
-	      while <quote>document-bottom</quote> will gather up
-	      all the subjectsets and place them in the bottom.
-	    </para>
-	    
-	    <para>
-	      The format of the subjectsets are controlled by
+	      section-top will place all the subjectsets in the given
+	      section at the top of the section
+	      while <quote>document-bottom</quote> will gather up all
+	      the subjectsets and place them in the bottom.  The
+	      format of the subjectsets are controlled by
 	      the <option>--subjectset-format</option> option.
 	    </para>
 	  </listitem>
@@ -266,18 +259,14 @@
 	  <term><option>--subjectset-format {none|list}</option></term>
 	  <listitem>
 	    <para>
-	      The default is not to format subjectsets. If this is
-	      set to list, then the subjectsets will be converted
-	      into a bullet list with the first level being the
-	      schemas and the second being the individual terms of
-	      each subjectset.
-	    </para>
-
-	    <para>
-	      The <option>creole</option> format include an
-	      additional subjectset
-	      format: <option>dokuwiki-tags</option> which formats
-	      it according to the tag plugin for DokuWiki.
+	      The default is not to format subjectsets. If this is set
+	      to list, then the subjectsets will be converted into a
+	      bullet list with the first level being the schemas and
+	      the second being the individual terms of each
+	      subjectset.  The <option>creole</option> format include
+	      an additional subjectset
+	      format: <option>dokuwiki-tags</option> which formats it
+	      according to the tag plugin for DokuWiki.
 	    </para>
 	  </listitem>
 	</varlistentry>
