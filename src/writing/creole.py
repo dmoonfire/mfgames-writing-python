@@ -4,11 +4,15 @@ import codecs
 import logging
 import os
 import re
+import sys
 
 import creoleparser.dialects
 import creoleparser.core
-import smartypants
 
+sys.path.append('/usr/share/mfgames-writing')
+sys.path.append('/usr/local/share/mfgames-writing')
+
+import smartypants
 import tools.process
 import writing
 
