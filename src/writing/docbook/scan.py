@@ -326,12 +326,14 @@ class ExtractSubjectsetsProcess(tools.process.InputFilesProcess):
 
         self.args = args
 
-        # Figure out the output, if we have one.
+        # Figure out the output, if we have one. If we are opening a file
+        # then write out the BOM for Unicode.
         if args.output:
             output = codecs.open(
                 args.output,
                 'w',
                 'utf-8')
+            output.write(codecs.BOM_UTF8)
         else:
             output = sys.stdout
 
