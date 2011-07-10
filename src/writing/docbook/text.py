@@ -33,6 +33,7 @@ class ConvertToTextFilesProcess(
         self.line_prefix = ''
         self.supress_newline = False
         self.path = []
+        self.attribution= ''
 
     def convert_file(self, args, input_filename, output_filename):
         """
@@ -137,6 +138,13 @@ class ConvertToTextFilesProcess(
             # Clear the buffer
             self.buffer = unicode()
 
+        # Handle blockquotes and attributations.
+        if name == "blockquote":
+            self.line_prefix = '> '
+
+        if name == "attribution":
+            self.buffer = unicode()
+
         # Handle some of the inline tag.
         if name == "command":
             self.buffer += "**"
@@ -179,6 +187,17 @@ class ConvertToTextFilesProcess(
 
         if name == "option":
             self.buffer += "//"
+
+        # Handle blockquotes and attributations.
+        if name == "attribution":
+            self.attribution = self.buffer
+            self.buffer = unicode()
+
+        if name == "blockquote":
+            self.output.write('> -- ' + self.attribution)
+            self.attributation = unicode()
+            self.line_prefix = ''
+            self.output.write(os.linesep)
 
         # Handle list elements.
         if (name == "itemizedlist" or name == "orderedlist"
