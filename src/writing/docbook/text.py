@@ -344,7 +344,7 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
             help='Determines how subject sets are formatted.')
 
     def get_extension(self):
-        """Defines the BBCode extension as .bbcode"""
+        """Defines the Creole extension as .creole"""
         return "creole"
 
     def get_line_prefix(self, element):
@@ -371,16 +371,15 @@ class ConvertToCreoleFilesProcess(ConvertToTextFilesProcess):
     def write_structure_header(self, structure):
         """Writes out the header for the structure entry."""
 
-        # If there is no contents of the header, just put in a
-        # horizontal line. Otherwise
-        if not structure.title:
-            self.output.write('----' + os.linesep)
-            return
+        # Creole uses =+ to break a section.
+        self.output.write(u'{0}'.format(
+            '=' * (structure.output_depth + 1),))
 
-        # Write out the header according to the WikiCreole format.
-        self.output.write(u'{0} {1}'.format(
-            '=' * (structure.output_depth + 1),
-            structure.title))
+        # If there is a title, then put it in.
+        if structure.title:
+            self.output.write(' ' + structure.title)
+
+        # Finish up with a newline.
         self.output.write(os.linesep)
 
     def write_subjectsets(self, subjectsets):
