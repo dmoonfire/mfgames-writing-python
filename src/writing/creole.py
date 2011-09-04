@@ -217,6 +217,14 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
         # Remove the info tags, if we have blanks.
         contents = contents.replace('<info></info>', '')
 
+        # In DocBook, list items have an inner paragraph instead of
+        # just having a direct list item. This replaces those lists
+        # with an inner paragraph.
+        contents = re.sub(
+            r'<listitem>(.*?)</listitem>',
+            r'<listitem><para>\1</para></listitem>',
+            contents)
+
         # Write the contents to the output file.
         output = open(output_filename, 'w')
         output.write(contents)
