@@ -22,6 +22,9 @@ setup(
         'src/mfgames-docbook',
         ],
     data_files=[
+        ('share/mfgames-writing', [
+            'lib/smartypants.py',
+            ]),
         ('share/mfgames-writing/tools', [
             'src/tools/__init__.py',
             'src/tools/process.py',
