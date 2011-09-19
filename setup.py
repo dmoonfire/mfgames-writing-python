@@ -32,9 +32,12 @@ setup(
         ('share/mfgames-writing/writing', [
             'src/writing/__init__.py',
             'src/writing/creole.py',
+            'src/writing/format.py',
             ]),
         ('share/mfgames-writing/writing/docbook', [
             'src/writing/docbook/__init__.py',
+            'src/writing/docbook/count.py',
+            'src/writing/docbook/info.py',
             'src/writing/docbook/scan.py',
             'src/writing/docbook/text.py',
             ]),
