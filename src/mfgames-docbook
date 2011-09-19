@@ -7,6 +7,7 @@ sys.path.append('/usr/share/mfgames-writing')
 sys.path.append('/usr/local/share/mfgames-writing')
 
 import tools
+import writing.docbook.info
 import writing.docbook.text
 
 
@@ -16,9 +17,10 @@ def do_docbook_tool(arguments):
         arguments,
         {
             'bbcode': writing.docbook.text.ConvertToBBCodeFilesProcess(),
+            'count': writing.docbook.info.CountProcess(),
             'creole': writing.docbook.text.ConvertToCreoleFilesProcess(),
-            'extract-subjectsets':
-                writing.docbook.scan.ExtractSubjectsetsProcess(),
+            'subjectsets':
+                writing.docbook.info.ExtractSubjectsetsProcess(),
         })
 
 
