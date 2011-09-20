@@ -62,6 +62,19 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
         # the file might have it and we make that assumption.
         input_file = codecs.open(input_filename, mode='r', encoding='utf-8')
         contents = input_file.read()
+
+        # If we are removing commented lines, do it before we convert
+        # from Creole. Commented lines start with "#", which is
+        # normally a Creole numbered list (which probably won't show
+        # up in normal prose).
+        if args.enable_comments:
+            new_contents = []
+
+            for line in contents.split("\n"):
+                if not line.startswith("#"):
+                    new_contents.append(line)
+
+            contents = "\n".join(new_contents)
     
         # Create a parser that convert Creole into something that is
         # roughly Docbook. We'll have to do some additional parsing once
@@ -266,6 +279,10 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             '--id',
             type=str,
             help='Assigns the id to the top-level generated DocBook element.')
+        parser.add_argument(
+            '--enable-comments',
+            action='store_true',
+            help='If enabled, removes any lines that start with #.')
         parser.add_argument(
             '--ignore-localwords',
             action='store_true',
