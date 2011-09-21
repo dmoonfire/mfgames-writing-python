@@ -27,6 +27,7 @@ setup(
             ]),
         ('share/mfgames-writing/tools', [
             'src/tools/__init__.py',
+            'src/tools/args.py',
             'src/tools/process.py',
             ]),
         ('share/mfgames-writing/writing', [

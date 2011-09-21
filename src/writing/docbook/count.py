@@ -6,9 +6,11 @@ import os
 import sys
 import xml
 
+import tools.args
 import tools.process
 import writing.docbook.scan
 import writing.format
+
 
 class _CountScanner(xml.sax.ContentHandler):
     """Parses the DocBook XML and counts the various elements."""
@@ -20,6 +22,7 @@ class _CountScanner(xml.sax.ContentHandler):
         self.buffer = None
         self.gather_buffer = False
         self.context = None
+        self.need_chapter_title = False
 
     def characters(self, contents):
         """Processes character from the XML stream."""
@@ -34,12 +37,48 @@ class _CountScanner(xml.sax.ContentHandler):
 
         # When we start a paragraph, we want to gather all the text
         # into a buffer so we can process it.
-        if name == "para" or name == "simpara" or name == "title":
+        if name == "para" or name == "simpara":
+            self.need_chapter_title = False
             self.gather_buffer = True
             self.buffer = ""
 
+        if name == "title":
+            self.gather_buffer = True
+            self.buffer = ""
+
+        if name == "chapter":
+            self.set_chapter()
+            
+
     def endElement(self, name):
         """Processes the end of the XML element."""
+
+        # If we are at the end of the chapter, then clear the context
+        # if we are chapter-based.
+        if name == "chapter" and self.process.args.context == 'chapters':
+            self.context = None
+
+        # If we are at the end of a title, see if we think this is the
+        # chapter title.
+        if name == "title":
+            self.gather_buffer = False
+
+            if self.need_chapter_title:
+                # We don't need the chapter title anymore
+                self.need_chapter_title = False
+
+                # Grab the current chapter name
+                current_title = self.process.order[len(self.process.order) - 1]
+
+                # Change both the counts and the order.
+                self.process.counts[self.buffer] = (
+                    self.process.counts[current_title])
+
+                del self.process.counts[current_title]
+                self.process.order[len(self.process.order) - 1] = self.buffer
+
+                # Change the context for saving values.
+                self.context = self.buffer
 
         # At the end of each para or simppara tag, we increment the
         # paragraph counter and also process the collected buffer.
@@ -51,24 +90,42 @@ class _CountScanner(xml.sax.ContentHandler):
             # into this will cause it to split on any whitespace.
             para_word_count = len(self.buffer.split(None))
 
-            # Add the counts into the totals.
-            self.process.counts["_total"][0] += 1
-            self.process.counts["_total"][1] += para_word_count
+            # If we don't have a context, we don't do anything remarkable.
+            if self.context:        
+                # Add the counts into the totals.
+                self.process.counts["_total"][0] += 1
+                self.process.counts["_total"][1] += para_word_count
 
-            # Add the counts to the context, if we have one.
-            if self.context:
+                # Add the counts to the context, if we have one.
                 self.process.counts[self.context][0] += 1
                 self.process.counts[self.context][1] += para_word_count
+
+    def set_chapter(self):
+        """Sets the chapter as the context depending on the process
+        options."""
+
+        if self.process.args.context != 'chapters':
+            return
+
+        self.context = 'Chapter ' + format(len(self.process.order) + 1)
+        self.need_chapter_title = True
+
+        if not self.context in self.process.counts:
+            self.process.counts[self.context] = [0, 0]
+            self.process.order.append(self.context)
 
     def set_filename(self, filename):
         """Sets the filename as the context depending on the process
         options."""
 
+        if self.process.args.context != 'files':
+            return
+
         self.context = filename
 
         if not filename in self.process.counts:
             self.process.counts[filename] = [0, 0]
-            self.process.order += [ filename ]
+            self.process.order.append(filename)
 
 class CountProcess(tools.process.InputFilesProcess):
     """Scans the DocBook file and produces counts of various elements
@@ -86,7 +143,8 @@ class CountProcess(tools.process.InputFilesProcess):
         # of numbers. The array consists of the counts in this order:
         # paragraph, word.
         self.counts = {
-            "_title": ["Paras", "Words"],
+            "_title": ["Paragraphs", "Words"],
+            "_average": [0, 0],
             "_total": [0, 0]
             }
 
@@ -102,8 +160,8 @@ class CountProcess(tools.process.InputFilesProcess):
         record = self.counts[key]
         results = []
 
-        # Go through the formats and add a column for each request.
-        for format in self.args.format:
+        # Go through the columns and add a column for each request.
+        for format in self.args.columns:
             if format.lower().startswith('w'):
                 results.append(record[1])
             if format.lower().startswith('p'):
@@ -125,17 +183,34 @@ class CountProcess(tools.process.InputFilesProcess):
         # Process the format column, which may contains strings,
         # commas, and other elements that need to be converted into a
         # list.
-        formats = []
+        columns = []
 
-        if args.format:
-            for format in args.format:
+        if args.columns:
+            for format in args.columns:
                 for format_element in format.split(','):
-                    formats.append(format_element)
+                    columns.append(format_element)
 
-        if len(formats) == 0:
-            formats = ['paragraphs', 'words', 'context']
+        # If we don't have a defined format, then check to see if the
+        # preset ones are requested.
+        if len(columns) == 0:
+            # -p and -w add a default setup, but only if we don't
+            # already have one.
+            if args.paragraphs:
+                columns = ['paragraphs']
 
-        args.format = formats
+            if args.words:
+                columns = ['words']
+
+            # If we have either -p and/or -w, then we add context so
+            # the output is similiar to the `wc` command.
+            if len(columns) > 0:
+                columns.append("context");
+
+        # Check again to see if we didn't get anything.
+        if len(columns) == 0:
+            columns = ['paragraphs', 'words', 'context']
+
+        args.columns = columns
 
         # Process the files which in turn will call process_file on
         # each individual file.
@@ -149,19 +224,31 @@ class CountProcess(tools.process.InputFilesProcess):
         # First check to see if we need headers.
         table = []
 
-        if args.column_titles:
-            table.append(self.get_columns("_title", "File"))
+        if args.headers:
+            if args.context == 'files':
+                table.append(self.get_columns("_title", "File"))
+            if args.context == 'chapters':
+                table.append(self.get_columns("_title", "Chapters"))
 
         # Second, go through all the contexts (but not the total).
         for context in self.order:
             table.append(self.get_columns(context, context))
 
-        # Third, add the total column, if the arguments require it.
-        if not args.no_total:
+        # Third, add the average row if the arguments request it.
+        if args.average:
+            count = len(self.order)
+
+            if count > 0:
+                self.counts["_average"][0] = int(self.counts["_total"][0] / count)
+                self.counts["_average"][1] = int(self.counts["_total"][1] / count)
+                table.append(self.get_columns("_average", "Average"))
+
+        # Fourth, add the total column, if the arguments require it.
+        if args.total:
             table.append(self.get_columns("_total", "Total"))
 
         # Format and output the table to the standard out.
-        writing.format.output_table(sys.stdout, table, args.thousands)
+        writing.format.output_table(sys.stdout, table, args.format)
 
     def process_filename(self, filename):
         """Processes a single file and counts the appropriate
@@ -188,37 +275,40 @@ class CountProcess(tools.process.InputFilesProcess):
 
         # Add in the text-specific generations.
         parser.add_argument(
-            '--column-titles',
-            '-c',
-            action='store_true',
-            help="Include the headers in the output.")
+            '--context',
+            '-x',
+            default='files',
+            choices=['files', 'chapters'])
         parser.add_argument(
-            '--thousands',
-            action='store_true',
-            help="Format the output with commas.")
+            '--total',
+            default=True,
+            action=tools.args.BooleanAction)
         parser.add_argument(
-            '--no-total',
-            '-t',
-            action='store_true',
-            help="Do not include the total line in the output.")
+            '--average',
+            default=False,
+            action=tools.args.BooleanAction)
+        parser.add_argument(
+            '--headers',
+            default=False,
+            action=tools.args.BooleanAction)
+        parser.add_argument(
+            '--format',
+            '-f',
+            default=False,
+            action='store_true')
 
         parser.add_argument(
             '--words',
             '-w',
-            action='append_const',
-            const='words',
-            dest='format',
+            action='store_true',
             help="Include the word count column.")
         parser.add_argument(
             '--paragraphs',
             '-p',
-            action='append_const',
-            const='paragraphs',
-            dest='format',
+            action='store_true',
             help="Include the paragraph count column.")
         parser.add_argument(
-            '--format',
-            '-f',
-            action='append',
-            dest='format',
+            '--columns',
+            '-c',
+            action='store',
             help="Include the paragraph count column.")

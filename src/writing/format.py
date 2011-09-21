@@ -26,7 +26,7 @@ def format_number(s, add_commas):
     # If we don't need to add commas, or the value isn't an integer,
     # then just return it as a string.
     if not add_commas or not is_number(s):
-        return str(s)
+        return unicode(s)
 
     # Return the result as a formatting string.
     inum = int(s)
