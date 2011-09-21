@@ -522,6 +522,8 @@ class DocbookMetadataParser(object):
 
                 if key == 'Author':
                     buf.append(self.create_author(value))
+                elif key == 'Copyright':
+                    buf.append(self.create_copyright(value))
                 else:
                     buf.append(self.create_subjectset(key, value))
 
@@ -567,6 +569,34 @@ class DocbookMetadataParser(object):
             buf.append('</firstname>')
 
         buf.append('</author>')
+
+        # Return the resulting string.
+        return "".join(buf)
+
+    def create_copyright(self, value):
+        """
+        Create an <copyright> tag that represents the copryight. The
+        string must be in the form of "Year[, Year], Author".
+        """
+
+        # Split on the comma for the name
+        values = re.split(r'\s*,\s*', value)
+
+        # Create the XML tag for the copyright.
+        buf = ['<copyright>']
+
+        # All but the last one is a year tag.
+        for index in range(len(values)):
+            if index == len(values) -1:
+                buf.append('<holder>')
+                buf.append(values[index])
+                buf.append('</holder>')
+            else:
+                buf.append('<year>')
+                buf.append(values[index])
+                buf.append('</year>')
+
+        buf.append('</copyright>')
 
         # Return the resulting string.
         return "".join(buf)
