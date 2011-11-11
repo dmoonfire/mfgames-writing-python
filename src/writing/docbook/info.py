@@ -2,6 +2,7 @@
 producing output based on its contents."""
 
 
+import codecs
 import os
 import sys
 import xml
@@ -35,8 +36,8 @@ class ExtractSubjectsetsProcess(tools.process.InputFilesProcess):
         if args.output:
             output = codecs.open(
                 args.output,
-                'w',
-                'utf-8')
+                mode='w',
+                encoding='utf-8')
             output.write(codecs.BOM_UTF8)
         else:
             output = sys.stdout
