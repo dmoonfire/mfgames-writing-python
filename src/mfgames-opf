@@ -7,17 +7,35 @@ sys.path.append('/usr/share/mfgames-writing')
 sys.path.append('/usr/local/share/mfgames-writing')
 
 import tools
+import writing.opf.cover
+import writing.opf.dc
+import writing.opf.guide
 import writing.opf.manifest
+import writing.opf.spine
+import writing.opf.toc
 
 
 def do_opf_tool(arguments):
     tools.run_tool(
-        "Manipulate and convert OPF files.",
+        "Query and manipulate OPF files.",
         arguments,
         {
-            'manifest': writing.opf.manifest.ListManifestProcess(),
-            #'remove-manifest': writing.opf.manifest.ManifestProcess(),
-            #'add-manifest': writing.opf.manifest.ManifestProcess(),
+            'cover-get': writing.opf.cover.CoverGetProcess(),
+            #'cover-set': writing.opf.cover.CoverSetProcess(),
+            #'dc-add': writing.opf.dc.DublicCoreAddProcess(),
+            'dc-list': writing.opf.dc.DublinCoreListProcess(),
+            #'dc-remove': writing.opf.dc.DublinCoreRemoveProcess(),
+            #'dc-set': writing.opf.dc.DublinCoreSetProcess(),
+            'guide-list': writing.opf.guide.GuideListProcess(),
+            #'manifest-add': writing.opf.manifest.ManifestAddProcess(),
+            'manifest-list': writing.opf.manifest.ManifestListProcess(),
+            #'manifest-remove': writing.opf.manifest.ManifestRemoveProcess(),
+            #'manifest-set': writing.opf.manifest.ManifestSetProcess(),
+            'spine-list': writing.opf.spine.SpineListProcess(),
+            #'spine-add': writing.opf.spine.SpineAddProcess(),
+            #'spine-remove': writing.opf.spine.SpineRemoveProcess(),
+            'toc-get': writing.opf.toc.TocGetProcess(),
+            #'toc-set': writing.opf.toc.TocSetprocess(),
         })
 
 
