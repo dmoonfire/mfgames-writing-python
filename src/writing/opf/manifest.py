@@ -23,6 +23,26 @@ class ManifestListProcess(writing.opf.ReportOpfFileProcess):
             print('\t'.join(fields))
 
 
+class ManifestRemoveProcess(writing.opf.ManipulateOpfFileProcess):
+    def get_help(self):
+        return "Removes an entry in the manifest."
+
+    def manipulate(self):
+        pass
+
+    def setup_arguments(self, parser):
+        """Sets up the command-line arguments for file processing."""
+
+        # Add in the argument from the base class.
+        super(ManifestRemoveProcess, self).setup_arguments(parser)
+
+        # Add in the text-specific generations.
+        parser.add_argument(
+            'id',
+            type=str,
+            help="The ID for the manifest entry")
+
+
 class ManifestSetProcess(writing.opf.ManipulateOpfFileProcess):
     """Sets an item in the manifest"""
 
