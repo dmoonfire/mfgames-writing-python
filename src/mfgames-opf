@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+import logging
+import sys
+
+sys.path.append('/usr/share/mfgames-writing')
+sys.path.append('/usr/local/share/mfgames-writing')
+
+import tools
+import writing.opf.manifest
+
+
+def do_opf_tool(arguments):
+    tools.run_tool(
+        "Manipulate and convert OPF files.",
+        arguments,
+        {
+            'manifest': writing.opf.manifest.ListManifestProcess(),
+            #'remove-manifest': writing.opf.manifest.ManifestProcess(),
+            #'add-manifest': writing.opf.manifest.ManifestProcess(),
+        })
+
+
+if __name__ == "__main__":
+    do_opf_tool(sys.argv[1:])
