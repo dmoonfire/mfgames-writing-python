@@ -23,9 +23,10 @@ def do_ncx_tool(arguments):
             'meta-list': writing.ncx.meta.MetaListProcess(),
             'meta-remove': writing.ncx.meta.MetaRemoveProcess(),
             'meta-set': writing.ncx.meta.MetaSetProcess(),
-            #'nav-append': writing.ncx.nav.NavAppendProcess(),
-            #'nav-insert': writing.ncx.nav.NavInsertProcess(),
+            'nav-append': writing.ncx.nav.NavAppendProcess(),
+            'nav-insert': writing.ncx.nav.NavInsertProcess(),
             'nav-list': writing.ncx.nav.NavListProcess(),
+            'nav-remove': writing.ncx.nav.NavRemoveProcess(),
             'title-get': writing.ncx.title.TitleGetProcess(),
             'title-set': writing.ncx.title.TitleSetProcess(),
         })
