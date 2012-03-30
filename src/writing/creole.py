@@ -87,6 +87,7 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
         # Normalize the construct of '"something-"' into something
         # SmartyPants can handle.
         contents = contents.replace('-"', '--"')
+        contents = contents.replace('"-', '"--')
     
         # Change the typographical quotes into something aesthetic. We
         # do this before converting from Creole because of the tags
@@ -140,6 +141,14 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             '</strong>',
             '</emphasis>')
         
+        # Convert the image tags into the DocBook versions.
+        contents = re.sub(
+            r'<img src="(.*?)".*?/>',
+            r'<mediaobject><imageobject>'
+            + r'<imagedata align="center" fileref="\1"/>'
+            + r'</imageobject></mediaobject>',
+            contents)
+
         # Convert backticks into foreignphrases.
         if args.parse_backticks:
             contents = re.sub(
