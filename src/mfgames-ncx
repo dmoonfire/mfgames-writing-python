@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+import logging
+import sys
+
+sys.path.append('/usr/share/mfgames-writing')
+sys.path.append('/usr/local/share/mfgames-writing')
+
+import tools
+import writing.ncx.author
+import writing.ncx.meta
+import writing.ncx.nav
+import writing.ncx.title
+
+
+def do_ncx_tool(arguments):
+    tools.run_tool(
+        "Query and manipulate NCX files.",
+        arguments,
+        {
+            'author-get': writing.ncx.author.AuthorGetProcess(),
+            'author-set': writing.ncx.author.AuthorSetProcess(),
+            'meta-list': writing.ncx.meta.MetaListProcess(),
+            'meta-remove': writing.ncx.meta.MetaRemoveProcess(),
+            'meta-set': writing.ncx.meta.MetaSetProcess(),
+            #'nav-append': writing.ncx.nav.NavAppendProcess(),
+            #'nav-insert': writing.ncx.nav.NavInsertProcess(),
+            'nav-list': writing.ncx.nav.NavListProcess(),
+            'title-get': writing.ncx.title.TitleGetProcess(),
+            'title-set': writing.ncx.title.TitleSetProcess(),
+        })
+
+
+if __name__ == "__main__":
+    do_ncx_tool(sys.argv[1:])
