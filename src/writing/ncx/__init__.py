@@ -1,10 +1,14 @@
 """Top-level module for NCX writing utilities."""
 
 
+from xml.dom.minidom import Document
 import abc
-import tools.process
+import codecs
+import sys
 import xml.sax
 
+import tools.process
+import writing
 
 class _NcxScanner(xml.sax.ContentHandler):
     """Scans an NCX file and populates the internal structure."""
@@ -100,7 +104,7 @@ class InputNcxFileProcess(tools.process.InputFileProcess):
         scanner = _NcxScanner(self.ncx)
         parser = xml.sax.make_parser()
         parser.setContentHandler(scanner)
-        parser.parse(open(args.file))
+        parser.parse(codecs.open(args.file, 'r', 'utf-8'))
 
 
 class ReportNcxFileProcess(InputNcxFileProcess):
@@ -161,8 +165,14 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
         if self.args.output == None:
             self.args.output = self.args.file
 
+        # Get the handle to the output.
+        if self.args.output == "-":
+            output = sys.stdout
+        else:
+            output = codecs.open(self.args.output, 'w', 'utf-8-sig')
+
         # Write the resulting file out to the given stream.
-        print("Writing out some files!")
+        self.write_output(output)
 
     @abc.abstractmethod
     def manipulate(self):
@@ -182,3 +192,73 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
             type=str,
             help="Writes the results to the given file, or in place if missing.")
 
+    def write_output(self, output):
+        """Writes the NCX file to the given handle."""
+
+        # Create the XML document.
+        dom = xml.dom.minidom.getDOMImplementation('')
+        doc_type = dom.createDocumentType(
+            "ncx",
+            "-//NISO//DTD ncx 2005-1//EN",
+            "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd")
+        doc = Document()
+        doc.appendChild(doc_type)
+
+        # Create the NCX tag.
+        ncx = doc.createElement("ncx")
+        doc.appendChild(ncx)
+        ncx.setAttribute("version", "2005-1")
+        ncx.setAttribute("xml:lang", "en-US")
+        ncx.setAttribute("xmlns", "http://www.daisy.org/z3986/2005/ncx/")
+
+        # Create the header.
+        head = doc.createElement("head")
+        ncx.appendChild(head)
+
+        for name in sorted(self.ncx.meta.keys()):
+            value = self.ncx.meta[name]
+            
+            meta = doc.createElement("meta")
+            head.appendChild(meta)
+            meta.setAttribute("name", name)
+            meta.setAttribute("content", value)
+        
+        # DC-related fields.
+        author = doc.createElement("docAuthor")
+        ncx.appendChild(author)
+        author.appendChild(doc.createTextNode(self.ncx.author))
+
+        title = doc.createElement("docTitle")
+        ncx.appendChild(title)
+        title.appendChild(doc.createTextNode(self.ncx.title))
+
+        # Create the navMap
+        nav = doc.createElement('navMap')
+        ncx.appendChild(nav)
+
+        order = 1
+        for n in self.ncx.navpoints:
+            # Create the navPoint element.
+            point = doc.createElement("navPoint")
+            nav.appendChild(point)
+            point.setAttribute("id", n[0])
+            point.setAttribute("playOrder", format(order))
+
+            # Create the inner label element.
+            label = doc.createElement("navLabel")
+            point.appendChild(label)
+
+            text = doc.createElement("text")
+            label.appendChild(text)
+            text.appendChild(doc.createTextNode(n[1]))
+
+            # Create the content node.
+            content = doc.createElement("content")
+            point.appendChild(content)
+            content.setAttribute("src", n[2])
+
+            # Increment the order so they are sequential.
+            order += 1
+
+        # Print out the resulting file.
+        output.write(doc.toprettyxml(indent="  "))

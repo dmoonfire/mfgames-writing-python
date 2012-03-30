@@ -10,6 +10,15 @@ import tools.process
 import writing.ncx
 
 
+def get_navpoint_index(navpoints, id):
+    index = 0
+
+    for navpoint in navpoints:
+        if navpoint[0] == id:
+            return index
+
+        index += 1
+
 class NavAppendProcess(writing.ncx.ManipulateNcxFileProcess):
     """Appends a navigation entry to the NCX file."""
 
@@ -56,7 +65,9 @@ class NavInsertProcess(writing.ncx.ManipulateNcxFileProcess):
             self.args.title,
             self.args.href,
             ]
-        #self.ncx.navpoints.insert(record)
+
+        index = get_navpoint_index(self.ncx.navpoints, self.args.before)
+        self.ncx.navpoints.insert(index, record)
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""
@@ -65,6 +76,10 @@ class NavInsertProcess(writing.ncx.ManipulateNcxFileProcess):
         super(NavInsertProcess, self).setup_arguments(parser)
 
         # Add in the text-specific generations.
+        parser.add_argument(
+            'before',
+            type=str,
+            help="The unique identifier for the navigation point.")
         parser.add_argument(
             'id',
             type=str,
@@ -98,8 +113,8 @@ class NavRemoveProcess(writing.ncx.ManipulateNcxFileProcess):
         return "Removes a given nav point."
 
     def manipulate(self):
-        #self.ncx.navdata_dc[self.args.key] = self.args.value
-        pass
+        index = get_navpoint_index(self.ncx.navpoints, self.args.id)
+        del self.ncx.navpoints[index]
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""

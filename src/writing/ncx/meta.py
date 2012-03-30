@@ -19,7 +19,7 @@ class MetaListProcess(writing.ncx.ReportNcxFileProcess):
     def report_tsv(self):
         for name in sorted(self.ncx.meta.keys()):
             value = self.ncx.meta[name]
-            fields = [dc, dc_contents]
+            fields = [name, value]
             print('\t'.join(fields))
 
 
@@ -28,8 +28,7 @@ class MetaRemoveProcess(writing.ncx.ManipulateNcxFileProcess):
         return "Removes a given meta fields."
 
     def manipulate(self):
-        #self.ncx.metadata_dc[self.args.key] = self.args.value
-        pass
+        del self.ncx.meta[self.args.key]
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""
