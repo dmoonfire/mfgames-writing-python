@@ -1,6 +1,7 @@
 """Top-level module for OPF writing utilities."""
 
 
+import abc
 import tools.process
 import xml.sax
 
@@ -20,6 +21,10 @@ class _OpfScanner(xml.sax.ContentHandler):
             self.buffer += contents
 
     def startElement(self, name, attrs):
+        # Process the package
+        if name == "package":
+            self.opf.uid = attrs["unique-identifier"]
+
         # Process the manifest elements.
         if name == "item":
             # Save the attributes as the record, keyed by the id.
@@ -64,6 +69,7 @@ class Opf():
         self.metadata_dc = {}
         self.spine_itemrefs = []
         self.spine_toc = None
+        self.uid = None
 
 
 class InputOpfFileProcess(tools.process.InputFileProcess):
@@ -132,3 +138,46 @@ class ReportOpfFileProcess(InputOpfFileProcess):
             choices=['tsv'],
             type=str,
             help="Gets the output format: tsv.")
+
+
+class ManipulateOpfFileProcess(InputOpfFileProcess):
+    """Base class for processes that load in an OPF, make changes, and
+    write it out either in place or to an output file."""
+
+    def __init__(self):
+        super(ManipulateOpfFileProcess, self).__init__()
+        self.report_format = None
+
+    def process(self, args):
+        # Handle the base class' processing which verifies the file
+        # already exists.
+        super(ManipulateOpfFileProcess, self).process(args)
+
+        # Call the manipulate method to make the changes.
+        self.manipulate()
+
+        # If the output file is not defined, write it in place.
+        if self.args.output == None:
+            self.args.output = self.args.file
+
+        # Write the resulting file out to the given stream.
+        print("Writing out some files!")
+
+    @abc.abstractmethod
+    def manipulate(self):
+        """Manipulates the contents of the OPF file."""
+        pass
+
+    def setup_arguments(self, parser):
+        """Sets up the command-line arguments for file processing."""
+
+        # Add in the argument from the base class.
+        super(ManipulateOpfFileProcess, self).setup_arguments(parser)
+
+        # Add in the text-specific generations.
+        parser.add_argument(
+            '--output', '-o',
+            default=None,
+            type=str,
+            help="Writes the results to the given file, or in place if missing.")
+

@@ -13,6 +13,7 @@ import writing.opf.guide
 import writing.opf.manifest
 import writing.opf.spine
 import writing.opf.toc
+import writing.opf.uid
 
 
 def do_opf_tool(arguments):
@@ -21,21 +22,22 @@ def do_opf_tool(arguments):
         arguments,
         {
             'cover-get': writing.opf.cover.CoverGetProcess(),
-            #'cover-set': writing.opf.cover.CoverSetProcess(),
-            #'dc-add': writing.opf.dc.DublicCoreAddProcess(),
+            'cover-set': writing.opf.cover.CoverSetProcess(),
             'dc-list': writing.opf.dc.DublinCoreListProcess(),
             #'dc-remove': writing.opf.dc.DublinCoreRemoveProcess(),
-            #'dc-set': writing.opf.dc.DublinCoreSetProcess(),
+            'dc-set': writing.opf.dc.DublinCoreSetProcess(),
             'guide-list': writing.opf.guide.GuideListProcess(),
-            #'manifest-add': writing.opf.manifest.ManifestAddProcess(),
+            'guide-set': writing.opf.guide.GuideSetProcess(),
             'manifest-list': writing.opf.manifest.ManifestListProcess(),
             #'manifest-remove': writing.opf.manifest.ManifestRemoveProcess(),
-            #'manifest-set': writing.opf.manifest.ManifestSetProcess(),
+            'manifest-set': writing.opf.manifest.ManifestSetProcess(),
+            #'spine-set': writing.opf.spine.SpineSetProcess(),
             'spine-list': writing.opf.spine.SpineListProcess(),
-            #'spine-add': writing.opf.spine.SpineAddProcess(),
             #'spine-remove': writing.opf.spine.SpineRemoveProcess(),
             'toc-get': writing.opf.toc.TocGetProcess(),
-            #'toc-set': writing.opf.toc.TocSetprocess(),
+            'toc-set': writing.opf.toc.TocSetProcess(),
+            'uid-get': writing.opf.uid.UidGetProcess(),
+            'uid-set': writing.opf.uid.UidSetProcess(),
         })
 
 

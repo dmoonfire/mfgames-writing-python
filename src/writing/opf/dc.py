@@ -21,3 +21,30 @@ class DublinCoreListProcess(writing.opf.ReportOpfFileProcess):
             dc_contents = self.opf.metadata_dc[dc]
             fields = [dc, dc_contents]
             print('\t'.join(fields))
+
+
+class DublinCoreSetProcess(writing.opf.ManipulateOpfFileProcess):
+    """Scans the OPF file and lists the Dublin Core entries."""
+
+    def get_help(self):
+        return "Sets the given Dublin Core field to the given value."
+
+    def manipulate(self):
+        self.opf.metadata_dc[self.args.key] = self.args.value
+
+    def setup_arguments(self, parser):
+        """Sets up the command-line arguments for file processing."""
+
+        # Add in the argument from the base class.
+        super(DublinCoreSetProcess, self).setup_arguments(parser)
+
+        # Add in the text-specific generations.
+        parser.add_argument(
+            'key',
+            type=str,
+            help="The Dublin Core field, without the leading dc: (e.g., Creator)")
+        parser.add_argument(
+            'value',
+            type=str,
+            help="The value for the field.")
+
