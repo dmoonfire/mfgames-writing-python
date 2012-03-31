@@ -28,7 +28,7 @@ class ManifestRemoveProcess(writing.opf.ManipulateOpfFileProcess):
         return "Removes an entry in the manifest."
 
     def manipulate(self):
-        pass
+        del self.opf.manifest_items[self.args.id]
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""

@@ -27,7 +27,7 @@ class SpineRemoveProcess(writing.opf.ManipulateOpfFileProcess):
         return "Removes an entry in the spine."
 
     def manipulate(self):
-        pass
+        self.opf.spine_itemrefs.remove(self.args.id)
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""
@@ -49,6 +49,9 @@ class SpineSetProcess(writing.opf.ManipulateOpfFileProcess):
         return "Replaces or adds an entr in the spine."
 
     def manipulate(self):
+        if self.args.id in self.opf.spine_itemrefs:
+            self.opf.spine_itemrefs.remove(self.args.id)
+
         self.opf.spine_itemrefs.append(self.args.id)
 
     def setup_arguments(self, parser):

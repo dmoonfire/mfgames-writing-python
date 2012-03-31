@@ -27,6 +27,7 @@ def do_opf_tool(arguments):
             'dc-remove': writing.opf.dc.DublinCoreRemoveProcess(),
             'dc-set': writing.opf.dc.DublinCoreSetProcess(),
             'guide-list': writing.opf.guide.GuideListProcess(),
+            'guide-remove': writing.opf.guide.GuideRemoveProcess(),
             'guide-set': writing.opf.guide.GuideSetProcess(),
             'manifest-list': writing.opf.manifest.ManifestListProcess(),
             'manifest-remove': writing.opf.manifest.ManifestRemoveProcess(),

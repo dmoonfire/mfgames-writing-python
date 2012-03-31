@@ -1,9 +1,13 @@
 """Top-level module for OPF writing utilities."""
 
 
+from xml.dom.minidom import Document
 import abc
-import tools.process
+import codecs
+import sys
 import xml.sax
+
+import tools.process
 
 
 class _OpfScanner(xml.sax.ContentHandler):
@@ -160,8 +164,14 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         if self.args.output == None:
             self.args.output = self.args.file
 
+        # Get the handle to the output.
+        if self.args.output == "-":
+            output = sys.stdout
+        else:
+            output = codecs.open(self.args.output, 'w', 'utf-8')
+
         # Write the resulting file out to the given stream.
-        print("Writing out some files!")
+        self.write_output(output)
 
     @abc.abstractmethod
     def manipulate(self):
@@ -181,3 +191,75 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
             type=str,
             help="Writes the results to the given file, or in place if missing.")
 
+    def write_output(self, output):
+        """Writes the NCX file to the given handle."""
+
+        # Create the XML document.
+        doc = Document()
+
+        # Create the OPF tag.
+        opf = doc.createElement("package")
+        doc.appendChild(opf)
+        opf.setAttribute("unique-identifier", self.opf.uid)
+        opf.setAttribute("xmlns", "http://www.idpf.org/2007/opf")
+        opf.setAttribute("xmlns:dc", "http://purl.org/metadata/dublin_core")
+
+        # Create the metadata element.
+        metadata = doc.createElement("metadata")
+        opf.appendChild(metadata)
+
+        for dc in sorted(self.opf.metadata_dc.keys()):
+            contents = self.opf.metadata_dc[dc]
+            element = doc.createElement("dc:" + dc)
+            element.appendChild(doc.createTextNode(contents))
+
+            metadata.appendChild(element)
+
+        for name in sorted(self.opf.metadata_meta.keys()):
+            content = self.opf.metadata_meta[name]
+            element = doc.createElement("meta")
+            element.setAttribute("name", name)
+            element.setAttribute("content", content)
+
+            metadata.appendChild(element)
+
+        # Create the manifest elements.
+        manifest = doc.createElement("manifest")
+        opf.appendChild(manifest)
+
+        for manifest_id in sorted(self.opf.manifest_items.keys()):
+            fields = self.get_manifest(manifest_id)
+            element = doc.createElement("item")
+            element.setAttribute("id", fields[0])
+            element.setAttribute("href", fields[1])
+            element.setAttribute("media-type", fields[2])
+
+            manifest.appendChild(element)
+
+        # Create the spine elements.
+        spine = doc.createElement("spine")
+        spine.setAttribute("toc", self.opf.spine_toc)
+        opf.appendChild(spine)
+
+        for spine_id in sorted(self.opf.spine_itemrefs):
+            element = doc.createElement("item")
+            element.setAttribute("idref", spine_id)
+
+            spine.appendChild(element)
+
+        # Create the guide elements.
+        guide = doc.createElement("guide")
+        opf.appendChild(guide)
+
+        for guide_id in sorted(self.opf.guide_references.keys()):
+            g = self.opf.guide_references[guide_id]
+
+            element = doc.createElement("reference")
+            element.setAttribute("type", g["type"])
+            element.setAttribute("title", g["title"])
+            element.setAttribute("href", g["href"])
+
+            guide.appendChild(element)
+
+        # Print out the resulting file.
+        doc.writexml(output, encoding='utf-8', newl="\n", addindent="\t")

@@ -28,7 +28,7 @@ class DublinCoreRemoveProcess(writing.opf.ManipulateOpfFileProcess):
         return "Removes a given Dublin Core fields."
 
     def manipulate(self):
-        #self.opf.metadata_dc[self.args.key] = self.args.value
+        del self.opf.metadata_dc[self.args.key]
         pass
 
     def setup_arguments(self, parser):

@@ -8,7 +8,6 @@ import sys
 import xml.sax
 
 import tools.process
-import writing
 
 class _NcxScanner(xml.sax.ContentHandler):
     """Scans an NCX file and populates the internal structure."""
@@ -169,7 +168,7 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
         if self.args.output == "-":
             output = sys.stdout
         else:
-            output = codecs.open(self.args.output, 'w', 'utf-8-sig')
+            output = codecs.open(self.args.output, 'w', 'utf-8')
 
         # Write the resulting file out to the given stream.
         self.write_output(output)
@@ -261,4 +260,4 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
             order += 1
 
         # Print out the resulting file.
-        output.write(doc.toprettyxml(indent="  "))
+        doc.writexml(output, encoding='utf-8', newl="\n", addindent="\t")

@@ -28,6 +28,26 @@ class GuideListProcess(writing.opf.ReportOpfFileProcess):
             print('\t'.join(self.parts))
 
 
+class GuideRemoveProcess(writing.opf.ManipulateOpfFileProcess):
+    def get_help(self):
+        return "Removes an entry in the guide."
+
+    def manipulate(self):
+        del self.opf.guide_references[self.args.type]
+
+    def setup_arguments(self, parser):
+        """Sets up the command-line arguments for file processing."""
+
+        # Add in the argument from the base class.
+        super(GuideRemoveProcess, self).setup_arguments(parser)
+
+        # Add in the text-specific generations.
+        parser.add_argument(
+            'type',
+            type=str,
+            help="The type for the guide entry")
+
+
 class GuideSetProcess(writing.opf.ManipulateOpfFileProcess):
     """Sets an item in the guide"""
 
