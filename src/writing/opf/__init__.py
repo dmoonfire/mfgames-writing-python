@@ -4,6 +4,7 @@
 from xml.dom.minidom import Document
 import abc
 import codecs
+import re
 import sys
 import xml.sax
 
@@ -19,6 +20,7 @@ class _OpfScanner(xml.sax.ContentHandler):
         self.buffer = ""
         self.buffer_capture = False
         self.opf = opf
+        self.parsed_id = None
 
     def characters(self, contents):
         if self.buffer_capture:
@@ -27,7 +29,7 @@ class _OpfScanner(xml.sax.ContentHandler):
     def startElement(self, name, attrs):
         # Process the package
         if name == "package":
-            self.opf.uid = attrs["unique-identifier"]
+            self.opf.uid_id = attrs["unique-identifier"]
 
         # Process the manifest elements.
         if name == "item":
@@ -54,11 +56,27 @@ class _OpfScanner(xml.sax.ContentHandler):
             # The Dublin Core elements are in the content string.
             self.buffer_capture = True
 
+            # If there an id field, we set it so we can use it after
+            # we finish the element parsing.
+            self.parsed_id = None
+
+            if "id" in attrs:
+                self.parsed_id = attrs["id"]
+
     def endElement(self, name):
         # Check for the Dublin Core elements
         if name.startswith("dc:"):
+            # Figure out the name. It always starts with the elements
+            # after the dc: tag (e.g., "dc:identifier" would be
+            # "identifier). If there is an id field, then we append
+            # that to the name with a hash prefix.
+            dc_type = name[3:]
+
+            if self.parsed_id:
+                dc_type += "#" + self.parsed_id
+
             # Save the components of the DC element.
-            self.opf.metadata_dc[name[3:]] = self.buffer
+            self.opf.metadata_dc[dc_type] = self.buffer
 
             # Stop the capturing process
             self.buffer_capture = False
@@ -73,7 +91,7 @@ class Opf():
         self.metadata_dc = {}
         self.spine_itemrefs = []
         self.spine_toc = None
-        self.uid = None
+        self.uid_id = None
 
 
 class InputOpfFileProcess(tools.process.InputFileProcess):
@@ -200,7 +218,7 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         # Create the OPF tag.
         opf = doc.createElement("package")
         doc.appendChild(opf)
-        opf.setAttribute("unique-identifier", self.opf.uid)
+        opf.setAttribute("unique-identifier", self.opf.uid_id)
         opf.setAttribute("xmlns", "http://www.idpf.org/2007/opf")
         opf.setAttribute("xmlns:dc", "http://purl.org/metadata/dublin_core")
 
@@ -209,10 +227,26 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         opf.appendChild(metadata)
 
         for dc in sorted(self.opf.metadata_dc.keys()):
+            # Get the dc tag and break out the ID field if we have one.
+            matches = re.search("^(.*?)#(.*?)$", dc)
+            name = dc
+            name_id = None
+
+            if matches:
+                name = matches.group(1)
+                name_id = matches.group(2)
+
+            # Create the element and optional ID field.
+            element = doc.createElement("dc:" + name)
+
+            if name_id:
+                element.attributes["id"] = name_id
+
+            # Write out the contents of the DC tag.
             contents = self.opf.metadata_dc[dc]
-            element = doc.createElement("dc:" + dc)
             element.appendChild(doc.createTextNode(contents))
 
+            # Append the DC element to the metadata parent.
             metadata.appendChild(element)
 
         for name in sorted(self.opf.metadata_meta.keys()):
@@ -242,7 +276,7 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         opf.appendChild(spine)
 
         for spine_id in sorted(self.opf.spine_itemrefs):
-            element = doc.createElement("item")
+            element = doc.createElement("itemref")
             element.setAttribute("idref", spine_id)
 
             spine.appendChild(element)
