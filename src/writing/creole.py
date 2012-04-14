@@ -118,11 +118,15 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             # Go through all the paragraphs and number them
             contents = self.number_paragraphs(contents)
 
-        # Convert the typographical quotes into <quote> tags.
+        # Convert the typographical quotes into formatted quotes. If
+        # the user has requested they be converted into Docbook
+        # <quote> tags, we do that now.
         log.debug('Changing quotes into DocBook quote tags')
         contents = re.sub(r'&amp;#(\d+);', r'&#\1;', contents)
-        contents = re.sub(r'&#8220;', '<quote>', contents)
-        contents = re.sub(r'&#8221;', '</quote>', contents)
+        
+        if args.convert_quotes:
+            contents = re.sub(r'&#8220;', '<quote>', contents)
+            contents = re.sub(r'&#8221;', '</quote>', contents)
 
         # Normalize the whitespace and trim the leading spaces.
         log.debug('Normalizing whitespace and paragraphs')
@@ -288,6 +292,10 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             '--id',
             type=str,
             help='Assigns the id to the top-level generated DocBook element.')
+        parser.add_argument(
+            '--convert-quotes',
+            action='store_true',
+            help='Converts double quotes into Docbook <quote> elements.')
         parser.add_argument(
             '--enable-comments',
             action='store_true',
