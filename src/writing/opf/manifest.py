@@ -50,11 +50,11 @@ class ManifestSetProcess(writing.opf.ManipulateOpfFileProcess):
         return "Replaces or adds an entr in the manifest."
 
     def manipulate(self):
-        record = [
-            self.args.id,
-            self.args.href,
-            self.args.type,
-            ]
+        record = {
+            'id': self.args.id,
+            'href': self.args.href,
+            'media-type': self.args.type,
+            }
         self.opf.manifest_items[self.args.id] = record
 
     def setup_arguments(self, parser):
