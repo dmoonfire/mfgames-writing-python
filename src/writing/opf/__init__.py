@@ -219,8 +219,9 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         opf = doc.createElement("package")
         doc.appendChild(opf)
         opf.setAttribute("unique-identifier", self.opf.uid_id)
+        opf.setAttribute("version", "3.0")
         opf.setAttribute("xmlns", "http://www.idpf.org/2007/opf")
-        opf.setAttribute("xmlns:dc", "http://purl.org/metadata/dublin_core")
+        opf.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/")
 
         # Create the metadata element.
         metadata = doc.createElement("metadata")
