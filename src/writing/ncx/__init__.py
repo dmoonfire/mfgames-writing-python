@@ -52,7 +52,9 @@ class _NcxScanner(xml.sax.ContentHandler):
         clear_buffer = False
 
         if name == "text":
-            self.last_nav[1] = self.buffer
+            # Make sure we actually have a navigation block.
+            if self.last_nav:
+                self.last_nav[1] = self.buffer
             clear_buffer = True
 
         if name == "docTitle":
@@ -223,13 +225,15 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
             meta.setAttribute("content", value)
         
         # DC-related fields.
-        author = doc.createElement("docAuthor")
-        ncx.appendChild(author)
-        author.appendChild(doc.createTextNode(self.ncx.author))
+        if self.ncx.author:
+            author = doc.createElement("docAuthor")
+            ncx.appendChild(author)
+            author.appendChild(doc.createTextNode(self.ncx.author))
 
-        title = doc.createElement("docTitle")
-        ncx.appendChild(title)
-        title.appendChild(doc.createTextNode(self.ncx.title))
+        if self.ncx.title:
+            title = doc.createElement("docTitle")
+            ncx.appendChild(title)
+            title.appendChild(doc.createTextNode(self.ncx.title))
 
         # Create the navMap
         nav = doc.createElement('navMap')

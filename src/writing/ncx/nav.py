@@ -67,7 +67,7 @@ class NavInsertProcess(writing.ncx.ManipulateNcxFileProcess):
             ]
 
         index = get_navpoint_index(self.ncx.navpoints, self.args.before)
-        self.ncx.navpoints.insert(index, record)
+        self.ncx.navpoints.insert(self.args.before, record)
 
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for file processing."""
@@ -78,7 +78,7 @@ class NavInsertProcess(writing.ncx.ManipulateNcxFileProcess):
         # Add in the text-specific generations.
         parser.add_argument(
             'before',
-            type=str,
+            type=int,
             help="The unique identifier for the navigation point.")
         parser.add_argument(
             'id',
