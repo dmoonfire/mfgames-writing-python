@@ -4,6 +4,8 @@
 from xml.dom.minidom import Document
 import abc
 import codecs
+import datetime
+import os
 import re
 import sys
 import xml.sax
@@ -50,7 +52,8 @@ class _OpfScanner(xml.sax.ContentHandler):
 
         # Process the metadata elements.
         if name == "meta":
-            self.opf.metadata_meta[attrs["name"]] = attrs["content"]
+            self.buffer_capture = True
+            self.parsed_id = attrs["name"]
 
         if name.startswith("dc:"):
             # The Dublin Core elements are in the content string.
@@ -77,6 +80,14 @@ class _OpfScanner(xml.sax.ContentHandler):
 
             # Save the components of the DC element.
             self.opf.metadata_dc[dc_type] = self.buffer
+
+            # Stop the capturing process
+            self.buffer_capture = False
+            self.buffer = ""
+
+        if name == "meta":
+            # Save the value.
+            self.opf.metadata_meta[self.last_id] = self.buffer
 
             # Stop the capturing process
             self.buffer_capture = False
@@ -122,6 +133,15 @@ class InputOpfFileProcess(tools.process.InputFileProcess):
         parser = xml.sax.make_parser()
         parser.setContentHandler(scanner)
         parser.parse(open(args.file))
+
+        # Make sure the data is normalized. dcterms:modified is a
+        # required field, so we fake it with the timestamp of the file
+        # if we don't have anything else.
+        if not "dcterms:modified" in self.opf.metadata_meta:
+            file_stats = os.stat(args.file)
+            file_time = file_stats.st_mtime
+            file_timestamp = datetime.datetime.fromtimestamp(file_time)
+            self.opf.metadata_meta["dcterms:modified"] = file_timestamp.isoformat()
 
 
 class ReportOpfFileProcess(InputOpfFileProcess):
@@ -253,8 +273,8 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         for name in sorted(self.opf.metadata_meta.keys()):
             content = self.opf.metadata_meta[name]
             element = doc.createElement("meta")
-            element.setAttribute("name", name)
-            element.setAttribute("content", content)
+            element.setAttribute("property", name)
+            element.appendChild(doc.createTextNode(content))
 
             metadata.appendChild(element)
 
@@ -269,6 +289,7 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
             element.setAttribute("href", fields[1])
             element.setAttribute("media-type", fields[2])
 
+            # Finish adding the child to the list.
             manifest.appendChild(element)
 
         # Create the spine elements.

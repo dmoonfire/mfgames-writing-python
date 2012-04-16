@@ -20,6 +20,7 @@ def do_ncx_tool(arguments):
         {
             'author-get': writing.ncx.author.AuthorGetProcess(),
             'author-set': writing.ncx.author.AuthorSetProcess(),
+            'format': writing.ncx.FormatFileProcess(),
             'meta-list': writing.ncx.meta.MetaListProcess(),
             'meta-remove': writing.ncx.meta.MetaRemoveProcess(),
             'meta-set': writing.ncx.meta.MetaSetProcess(),

@@ -52,10 +52,12 @@ class _NcxScanner(xml.sax.ContentHandler):
         clear_buffer = False
 
         if name == "text":
-            # Make sure we actually have a navigation block.
+            # Make sure we actually have a navigation block. If we
+            # don't, we let it skip so the docTitle or docAuthor can
+            # catch it.
             if self.last_nav:
                 self.last_nav[1] = self.buffer
-            clear_buffer = True
+                clear_buffer = True
 
         if name == "docTitle":
             self.ncx.title = self.buffer
@@ -231,9 +233,12 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
             author.appendChild(doc.createTextNode(self.ncx.author))
 
         if self.ncx.title:
+            text = doc.createElement("text")
+            text.appendChild(doc.createTextNode(self.ncx.title))
             title = doc.createElement("docTitle")
+            title.appendChild(text)
+            
             ncx.appendChild(title)
-            title.appendChild(doc.createTextNode(self.ncx.title))
 
         # Create the navMap
         nav = doc.createElement('navMap')
@@ -248,12 +253,11 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
             point.setAttribute("playOrder", format(order))
 
             # Create the inner label element.
-            label = doc.createElement("navLabel")
-            point.appendChild(label)
-
             text = doc.createElement("text")
-            label.appendChild(text)
             text.appendChild(doc.createTextNode(n[1]))
+            label = doc.createElement("navLabel")
+            label.appendChild(text)
+            point.appendChild(label)
 
             # Create the content node.
             content = doc.createElement("content")
@@ -265,3 +269,18 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
 
         # Print out the resulting file.
         doc.writexml(output, encoding='utf-8', newl="\n", addindent="\t")
+
+
+class FormatFileProcess(ManipulateNcxFileProcess):
+    """Base class for processes that load in an NCX, make changes, and
+    write it out either in place or to an output file."""
+
+    def __init__(self):
+        super(FormatFileProcess, self).__init__()
+
+    def get_help(self):
+        return "Formats the NCX file."
+
+    def manipulate(self):
+        # We don't do anything since the default is to write out the results.
+        pass
