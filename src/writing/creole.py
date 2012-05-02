@@ -189,6 +189,10 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
         contents = self.wrap_sections(contents, args.root_element, 'h1',
             [ ])
 
+        # If we are putting ID fields on the section 2 and 3's, then
+        # we parse through it.
+        contents = self.id_sections(contents)
+
         # Trim the space between the tags.
         contents = contents.replace('> <', '><')
 
@@ -342,6 +346,29 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
     # Sections
     #
     
+    def id_sections(self, contents):
+        """
+        Give all the sections a unique identifier for the document.
+        """
+
+        # Split on the headings. The resulting list will have the initial
+        # text in the first element, then pairs of elements for every
+        # heading past it.
+        section_index = 0
+        section_regex = "<section>"
+        sections = re.split(section_regex, contents)
+        results = [sections[0]]
+    
+        # Loop through the resulting section pairs and create the elements.
+        for index in range(1, len(sections)):
+            results.append("<section id='s" + format(section_index) + "'>")
+            results.append(sections[index])
+
+            section_index += 1
+
+        # Return the resulting sections.
+        return "".join(results)
+
     def wrap_sections(self, contents, element, heading, outer_headings):
         """
         Looks for the headings within the contents and coverts them into
