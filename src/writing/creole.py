@@ -242,6 +242,14 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             attribution_parser = DocbookAttributionParser()
             contents = attribution_parser.parse(contents)
     
+        # If we are parsing epigraphs, we convert any blockquote right
+        # below an <info> tag as an epigraph.
+        if args.parse_epigraphs:
+            contents = re.sub(
+                r'</info>\s*<blockquote>(.*?)</blockquote>',
+                r'</info><epigraph>\1</epigraph>',
+                contents)
+
         # Add the namespaces and version to the top-level elements.
         # Add the XML and article headers.
         header_attributes = " ".join(namespaces)
@@ -333,6 +341,10 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             '--parse-backticks',
             action='store_true',
             help='Converts backticks (`phrase`) into foreigh phrases.')
+        parser.add_argument(
+            '--parse-epigraphs',
+            action='store_true',
+            help='Converts blockquotes below a section into epigraphs.')
         parser.add_argument(
             '--parse-languages',
             action='store_true',
