@@ -75,14 +75,13 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
                     new_contents.append(line)
 
             contents = "\n".join(new_contents)
-    
-        # Create a parser that convert Creole into something that is
-        # roughly Docbook. We'll have to do some additional parsing once
-        # we get the file to handle attribute folding, quotes, and
-        # sections.
-        parser = creoleparser.core.Parser(
-            dialect=DocbookCreoleParser,
-            method='xml')
+
+        # We used to use anonymous sections (sections with no titles)
+        # as bridgeheads. We convert these into a break
+        # line. Likewise, we allow any number of dashes to be a break
+        # character, but we want to normalize them to a single dash to
+        # make it easier to format.
+        contents = re.sub(r'\n[=-]+\n', r'\n-\n', contents)
 
         # Normalize the construct of '"something-"' into something
         # SmartyPants can handle.
@@ -102,9 +101,23 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
 
         contents = '\n\n'.join(parts)
     
-        # Convert the file into an XML string.
+        # Convert the file into an XML string using the Creole parser.
         log.debug('Converting Creole to XML')
+
+        parser = creoleparser.core.Parser(
+            dialect=DocbookCreoleParser,
+            method='xml')
+
         contents = parser(contents)
+
+        # Finish the breaks by convert the breaks into
+        # bridgeheads. DocBook doesn't have a good way of indicating a
+        # simple break, so we use otherrenderas with an arbitrary
+        # "break" as the key.
+        contents = re.sub(
+            r'<(sim)?para>-</(sim?)para>',
+            r'<bridgehead otherrenderas="break"/>',
+            contents)
 
         # Start by initializing the namespaces.
         namespaces = [writing.DOCBOOK_NAMESPACE]
