@@ -5,6 +5,7 @@ import logging
 import sys
 import mfgames_tools
 import mfgames_writing.docbook.count
+import mfgames_writing.docbook.gather
 import mfgames_writing.docbook.info
 import mfgames_writing.docbook.text
 
@@ -14,9 +15,14 @@ def do_docbook_tool(arguments):
         "Manipulate and convert DocBook 5 files.",
         arguments,
         {
-            'bbcode': mfgames_writing.docbook.text.ConvertToBBCodeFilesProcess(),
-            'count': mfgames_writing.docbook.count.CountProcess(),
-            'creole': mfgames_writing.docbook.text.ConvertToCreoleFilesProcess(),
+            'bbcode':
+                mfgames_writing.docbook.text.ConvertToBBCodeFilesProcess(),
+            'count':
+                mfgames_writing.docbook.count.CountProcess(),
+            'creole':
+                mfgames_writing.docbook.text.ConvertToCreoleFilesProcess(),
+            'gather':
+                mfgames_writing.docbook.gather.GatherFileProcess(),
             'subjectsets':
                 mfgames_writing.docbook.info.ExtractSubjectsetsProcess(),
         })
