@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 
+
 import argparse
 import logging
+import mfgames_tools
+import mfgames_writing.creole
 import sys
-
-sys.path.append('/usr/share/mfgames-writing')
-sys.path.append('/usr/local/share/mfgames-writing')
-
-import tools
-import writing.creole
 
 
 def do_creole_tool(arguments):
-    tools.run_tool(
+    mfgames_tools.run_tool(
         'Manipulate and convert Creole files.',
         arguments,
         {
-            'docbook' : writing.creole.CreoleDocbookConvertProcess(),
+            'docbook' : mfgames_writing.creole.CreoleDocbookConvertProcess(),
         })
 
 

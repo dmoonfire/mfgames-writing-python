@@ -4,17 +4,15 @@
 import abc
 import codecs
 import logging
+import mfgames_writing.docbook.scan
 import os
 import re
 import textwrap
 import xml.sax
 
-import tools.process
-import writing.docbook.scan
-
 
 class ConvertToTextFilesProcess(
-    writing.docbook.scan.ScanDocbookFilesProcess,
+    mfgames_writing.docbook.scan.ScanDocbookFilesProcess,
     xml.sax.ContentHandler):
     """Basic conversion process for Docbook into various text formats."""
     
@@ -105,7 +103,7 @@ class ConvertToTextFilesProcess(
 
         # Check for structural elements, if we have one, then
         # replace the current entry we are processing.
-        if writing.docbook.scan.is_structural(name):
+        if mfgames_writing.docbook.scan.is_structural(name):
             # Update where we are in the document
             self.structure_entry = self.structure.entries[self.structure_index]
             self.structure_index = self.structure_index + 1

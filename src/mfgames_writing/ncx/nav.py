@@ -2,12 +2,10 @@
 
 
 import codecs
+import mfgames_writing.ncx
 import os
 import sys
 import xml
-
-import tools.process
-import writing.ncx
 
 
 def get_navpoint_index(navpoints, id):
@@ -19,7 +17,7 @@ def get_navpoint_index(navpoints, id):
 
         index += 1
 
-class NavAppendProcess(writing.ncx.ManipulateNcxFileProcess):
+class NavAppendProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     """Appends a navigation entry to the NCX file."""
 
     def get_help(self):
@@ -53,7 +51,7 @@ class NavAppendProcess(writing.ncx.ManipulateNcxFileProcess):
             type=str,
             help="The href for the navigation entry.")
 
-class NavInsertProcess(writing.ncx.ManipulateNcxFileProcess):
+class NavInsertProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     """Inserts a navigation entry to the NCX file."""
 
     def get_help(self):
@@ -94,7 +92,7 @@ class NavInsertProcess(writing.ncx.ManipulateNcxFileProcess):
             help="The href for the navigation entry.")
 
 
-class NavListProcess(writing.ncx.ReportNcxFileProcess):
+class NavListProcess(mfgames_writing.ncx.ReportNcxFileProcess):
     """Scans the NCX file and lists the nav entries."""
 
     def get_help(self):
@@ -108,7 +106,7 @@ class NavListProcess(writing.ncx.ReportNcxFileProcess):
             index += 1
 
 
-class NavRemoveProcess(writing.ncx.ManipulateNcxFileProcess):
+class NavRemoveProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     def get_help(self):
         return "Removes a given nav point."
 

@@ -1,20 +1,16 @@
 """Handles processes for manipulating Creole files."""
 
+
 import codecs
+import creoleparser.core
+import creoleparser.dialects
 import logging
+import mfgames_tools.process
+import mfgames_writing
 import os
 import re
-import sys
-
-import creoleparser.dialects
-import creoleparser.core
-
-sys.path.append('/usr/share/mfgames-writing')
-sys.path.append('/usr/local/share/mfgames-writing')
-
 import smartypants
-import tools.process
-import writing
+import sys
 
 
 BaseParser = creoleparser.dialects.creole11_base()
@@ -41,7 +37,7 @@ class DocbookCreoleParser(BaseParser):
     nested_ul = creoleparser.dialects.NestedList('itemizedlist', '*')
 
 
-class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
+class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
     """Process for converting Creole files to DocBook."""
 
     def get_help(self):
@@ -120,13 +116,13 @@ class CreoleDocbookConvertProcess(tools.process.ConvertFilesProcess):
             contents)
 
         # Start by initializing the namespaces.
-        namespaces = [writing.DOCBOOK_NAMESPACE]
+        namespaces = [mfgames_writing.DOCBOOK_NAMESPACE]
 
         # If we need to number the paragraphs, we do that and add the
         # namespace for the numbering elements.
         if args.number_paragraphs:
             # Add the namespace so we can add an attribute.
-            namespaces.append(writing.MFGAMES_NAMESPACE)
+            namespaces.append(mfgames_writing.MFGAMES_NAMESPACE)
 
             # Go through all the paragraphs and number them
             contents = self.number_paragraphs(contents)

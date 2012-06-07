@@ -4,13 +4,11 @@
 import codecs
 import os
 import sys
+import mfgames_writing.ncx
 import xml
 
-import tools.process
-import writing.ncx
 
-
-class TitleGetProcess(writing.ncx.ReportNcxFileProcess):
+class TitleGetProcess(mfgames_writing.ncx.ReportNcxFileProcess):
     """Scans the NCX file and gets the title."""
 
     def get_help(self):
@@ -21,7 +19,7 @@ class TitleGetProcess(writing.ncx.ReportNcxFileProcess):
         print('\t'.join(fields))
 
 
-class TitleSetProcess(writing.ncx.ManipulateNcxFileProcess):
+class TitleSetProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     """Sets the title to a manifest entry."""
 
     def get_help(self):

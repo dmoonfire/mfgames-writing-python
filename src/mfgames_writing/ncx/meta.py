@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.ncx
 import os
 import sys
 import xml
 
-import tools.process
-import writing.ncx
 
-
-class MetaListProcess(writing.ncx.ReportNcxFileProcess):
+class MetaListProcess(mfgames_writing.ncx.ReportNcxFileProcess):
     """Scans the NCX file and lists the meta entries."""
 
     def get_help(self):
@@ -23,7 +21,7 @@ class MetaListProcess(writing.ncx.ReportNcxFileProcess):
             print('\t'.join(fields))
 
 
-class MetaRemoveProcess(writing.ncx.ManipulateNcxFileProcess):
+class MetaRemoveProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     def get_help(self):
         return "Removes a given meta fields."
 
@@ -43,7 +41,7 @@ class MetaRemoveProcess(writing.ncx.ManipulateNcxFileProcess):
             help="The Meta field, without the leading dc: (e.g., Creator)")
 
 
-class MetaSetProcess(writing.ncx.ManipulateNcxFileProcess):
+class MetaSetProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     """Scans the NCX file and lists the meta entries."""
 
     def get_help(self):

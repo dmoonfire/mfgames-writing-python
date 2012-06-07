@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class SpineListProcess(writing.opf.ReportOpfFileProcess):
+class SpineListProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and lists the spine entries."""
 
     def get_help(self):
@@ -22,7 +20,7 @@ class SpineListProcess(writing.opf.ReportOpfFileProcess):
             print('\t'.join(fields))
 
 
-class SpineRemoveProcess(writing.opf.ManipulateOpfFileProcess):
+class SpineRemoveProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     def get_help(self):
         return "Removes an entry in the spine."
 
@@ -42,7 +40,7 @@ class SpineRemoveProcess(writing.opf.ManipulateOpfFileProcess):
             help="The ID for the spine entry")
 
 
-class SpineSetProcess(writing.opf.ManipulateOpfFileProcess):
+class SpineSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Sets an item in the spine"""
 
     def get_help(self):

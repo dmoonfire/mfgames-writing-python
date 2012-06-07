@@ -12,55 +12,42 @@ from distutils.core import setup
 #
 
 setup(
+    # Metadata
     name='mfgames-writing',
-    version='0.1.0.0',
-    description='Utilities for text-base writing.',
+    version='0.2.0.0',
+    description='Utilities for manipulating various writing-based formats..',
     author='Dylan R. E. Moonfire',
+    author_email="contact@mfgames.com",
     url='http://mfgames.com/mfgames-writing',
+    classifiers=[
+        "Development Status :: 1 - Planning",
+        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Intended Audience :: End Users/Desktop",
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Topic :: Artistic Software",
+        "Topic :: Office/Business",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+        "Topic :: Text Processing :: Markup",
+        "Topic :: Text Processing",
+    ],
+
+    # Scripts
     scripts=[
         'src/mfgames-creole',
         'src/mfgames-docbook',
         'src/mfgames-ncx',
         'src/mfgames-opf',
         ],
-    data_files=[
-        ('share/mfgames-writing', [
-            'lib/smartypants.py',
-            ]),
-        ('share/mfgames-writing/tools', [
-            'src/tools/__init__.py',
-            'src/tools/args.py',
-            'src/tools/process.py',
-            ]),
-        ('share/mfgames-writing/writing', [
-            'src/writing/__init__.py',
-            'src/writing/constants.py',
-            'src/writing/creole.py',
-            'src/writing/format.py',
-            ]),
-        ('share/mfgames-writing/writing/docbook', [
-            'src/writing/docbook/__init__.py',
-            'src/writing/docbook/count.py',
-            'src/writing/docbook/info.py',
-            'src/writing/docbook/scan.py',
-            'src/writing/docbook/text.py',
-            ]),
-        ('share/mfgames-writing/writing/ncx', [
-            'src/writing/ncx/__init__.py',
-            'src/writing/ncx/meta.py',
-            'src/writing/ncx/author.py',
-            'src/writing/ncx/title.py',
-            'src/writing/ncx/nav.py',
-            ]),
-        ('share/mfgames-writing/writing/opf', [
-            'src/writing/opf/__init__.py',
-            'src/writing/opf/dc.py',
-            'src/writing/opf/cover.py',
-            'src/writing/opf/spine.py',
-            'src/writing/opf/manifest.py',
-            'src/writing/opf/uid.py',
-            'src/writing/opf/toc.py',
-            'src/writing/opf/guide.py',
-            ]),
+
+    # Packages
+    packages=[
+        "mfgames_writing",
+        "mfgames_writing.docbook",
+        "mfgames_writing.ncx",
+        "mfgames_writing.opf",
         ],
+    package_dir = {'': 'src'}
     )

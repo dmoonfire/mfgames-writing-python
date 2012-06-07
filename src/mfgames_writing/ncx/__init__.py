@@ -4,10 +4,10 @@
 from xml.dom.minidom import Document
 import abc
 import codecs
+import mfgames_tools.process
 import sys
 import xml.sax
 
-import tools.process
 
 class _NcxScanner(xml.sax.ContentHandler):
     """Scans an NCX file and populates the internal structure."""
@@ -80,7 +80,7 @@ class Ncx():
         self.author = None
 
 
-class InputNcxFileProcess(tools.process.InputFileProcess):
+class InputNcxFileProcess(mfgames_tools.process.InputFileProcess):
     """Imports the NCX file into memory."""
 
     def __init__(self):

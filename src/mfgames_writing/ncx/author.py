@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.ncx
 import os
 import sys
 import xml
 
-import tools.process
-import writing.ncx
 
-
-class AuthorGetProcess(writing.ncx.ReportNcxFileProcess):
+class AuthorGetProcess(mfgames_writing.ncx.ReportNcxFileProcess):
     """Scans the NCX file and gets the author."""
 
     def get_help(self):
@@ -21,7 +19,7 @@ class AuthorGetProcess(writing.ncx.ReportNcxFileProcess):
         print('\t'.join(fields))
 
 
-class AuthorSetProcess(writing.ncx.ManipulateNcxFileProcess):
+class AuthorSetProcess(mfgames_writing.ncx.ManipulateNcxFileProcess):
     """Sets the author to a manifest entry."""
 
     def get_help(self):

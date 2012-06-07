@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class UidGetProcess(writing.opf.ReportOpfFileProcess):
+class UidGetProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and gets the UID entries."""
 
     def get_help(self):
@@ -38,7 +36,7 @@ class UidGetProcess(writing.opf.ReportOpfFileProcess):
         print('\t'.join(fields))
 
 
-class UidSetProcess(writing.opf.ManipulateOpfFileProcess):
+class UidSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Sets the uid to a manifest entry."""
 
     def get_help(self):

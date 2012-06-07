@@ -3,15 +3,14 @@ producing output based on its contents."""
 
 
 import codecs
+import mfgames_tools
+import mfgames_writing.docbook.scan
 import os
 import sys
 import xml
 
-import tools.process
-import writing.docbook.scan
 
-
-class ExtractSubjectsetsProcess(tools.process.InputFilesProcess):
+class ExtractSubjectsetsProcess(mfgames_tools.process.InputFilesProcess):
     """Scans the DocBook file and extracts the subject sets."""
 
     def __init__(self):
@@ -52,7 +51,7 @@ class ExtractSubjectsetsProcess(tools.process.InputFilesProcess):
         # Go through the file and build up the structural elements of
         # the document. This is used to determine chunking and file
         # generation.
-        self.structure = writing.docbook.scan._StructureScanner(self, '')
+        self.structure = mfgames_writing.docbook.scan._StructureScanner(self, '')
         parser = xml.sax.make_parser()
         parser.setContentHandler(self.structure)
         parser.parse(open(input_filename))

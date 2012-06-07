@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class ManifestListProcess(writing.opf.ReportOpfFileProcess):
+class ManifestListProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and lists the manifest entries."""
 
     def get_help(self):
@@ -23,7 +21,7 @@ class ManifestListProcess(writing.opf.ReportOpfFileProcess):
             print('\t'.join(fields))
 
 
-class ManifestRemoveProcess(writing.opf.ManipulateOpfFileProcess):
+class ManifestRemoveProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     def get_help(self):
         return "Removes an entry in the manifest."
 
@@ -43,7 +41,7 @@ class ManifestRemoveProcess(writing.opf.ManipulateOpfFileProcess):
             help="The ID for the manifest entry")
 
 
-class ManifestSetProcess(writing.opf.ManipulateOpfFileProcess):
+class ManifestSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Sets an item in the manifest"""
 
     def get_help(self):

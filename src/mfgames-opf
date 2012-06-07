@@ -1,44 +1,40 @@
 #!/usr/bin/env python
 
 import logging
+import mfgames_tools
+import mfgames_writing.opf.cover
+import mfgames_writing.opf.dc
+import mfgames_writing.opf.guide
+import mfgames_writing.opf.manifest
+import mfgames_writing.opf.spine
+import mfgames_writing.opf.toc
+import mfgames_writing.opf.uid
 import sys
-
-sys.path.append('/usr/share/mfgames-writing')
-sys.path.append('/usr/local/share/mfgames-writing')
-
-import tools
-import writing.opf.cover
-import writing.opf.dc
-import writing.opf.guide
-import writing.opf.manifest
-import writing.opf.spine
-import writing.opf.toc
-import writing.opf.uid
 
 
 def do_opf_tool(arguments):
-    tools.run_tool(
+    mfgames_tools.run_tool(
         "Query and manipulate OPF files.",
         arguments,
         {
-            'cover-get': writing.opf.cover.CoverGetProcess(),
-            'cover-set': writing.opf.cover.CoverSetProcess(),
-            'dc-list': writing.opf.dc.DublinCoreListProcess(),
-            'dc-remove': writing.opf.dc.DublinCoreRemoveProcess(),
-            'dc-set': writing.opf.dc.DublinCoreSetProcess(),
-            'guide-list': writing.opf.guide.GuideListProcess(),
-            'guide-remove': writing.opf.guide.GuideRemoveProcess(),
-            'guide-set': writing.opf.guide.GuideSetProcess(),
-            'manifest-list': writing.opf.manifest.ManifestListProcess(),
-            'manifest-remove': writing.opf.manifest.ManifestRemoveProcess(),
-            'manifest-set': writing.opf.manifest.ManifestSetProcess(),
-            'spine-list': writing.opf.spine.SpineListProcess(),
-            'spine-remove': writing.opf.spine.SpineRemoveProcess(),
-            'spine-set': writing.opf.spine.SpineSetProcess(),
-            'toc-get': writing.opf.toc.TocGetProcess(),
-            'toc-set': writing.opf.toc.TocSetProcess(),
-            'uid-get': writing.opf.uid.UidGetProcess(),
-            'uid-set': writing.opf.uid.UidSetProcess(),
+            'cover-get': mfgames_writing.opf.cover.CoverGetProcess(),
+            'cover-set': mfgames_writing.opf.cover.CoverSetProcess(),
+            'dc-list': mfgames_writing.opf.dc.DublinCoreListProcess(),
+            'dc-remove': mfgames_writing.opf.dc.DublinCoreRemoveProcess(),
+            'dc-set': mfgames_writing.opf.dc.DublinCoreSetProcess(),
+            'guide-list': mfgames_writing.opf.guide.GuideListProcess(),
+            'guide-remove': mfgames_writing.opf.guide.GuideRemoveProcess(),
+            'guide-set': mfgames_writing.opf.guide.GuideSetProcess(),
+            'manifest-list': mfgames_writing.opf.manifest.ManifestListProcess(),
+            'manifest-remove': mfgames_writing.opf.manifest.ManifestRemoveProcess(),
+            'manifest-set': mfgames_writing.opf.manifest.ManifestSetProcess(),
+            'spine-list': mfgames_writing.opf.spine.SpineListProcess(),
+            'spine-remove': mfgames_writing.opf.spine.SpineRemoveProcess(),
+            'spine-set': mfgames_writing.opf.spine.SpineSetProcess(),
+            'toc-get': mfgames_writing.opf.toc.TocGetProcess(),
+            'toc-set': mfgames_writing.opf.toc.TocSetProcess(),
+            'uid-get': mfgames_writing.opf.uid.UidGetProcess(),
+            'uid-set': mfgames_writing.opf.uid.UidSetProcess(),
         })
 
 

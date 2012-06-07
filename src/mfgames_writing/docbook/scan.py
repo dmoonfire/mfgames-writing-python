@@ -2,11 +2,10 @@
 
 
 import codecs
+import mfgames_tools.process
 import os
 import sys
 import xml.sax
-
-import tools.process
 
 
 def is_structural(name):
@@ -255,7 +254,7 @@ class _StructureScanner(xml.sax.ContentHandler):
             self.process.get_extension())
 
 
-class ScanDocbookFilesProcess(tools.process.ConvertFilesProcess):
+class ScanDocbookFilesProcess(mfgames_tools.process.ConvertFilesProcess):
     """Scans the DocBook file and analyzes the structure."""
 
     def __init__(self):

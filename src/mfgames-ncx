@@ -1,35 +1,32 @@
 #!/usr/bin/env python
 
+
 import logging
+import mfgames_tools
+import mfgames_writing.ncx.author
+import mfgames_writing.ncx.meta
+import mfgames_writing.ncx.nav
+import mfgames_writing.ncx.title
 import sys
-
-sys.path.append('/usr/share/mfgames-writing')
-sys.path.append('/usr/local/share/mfgames-writing')
-
-import tools
-import writing.ncx.author
-import writing.ncx.meta
-import writing.ncx.nav
-import writing.ncx.title
 
 
 def do_ncx_tool(arguments):
-    tools.run_tool(
+    mfgames_tools.run_tool(
         "Query and manipulate NCX files.",
         arguments,
         {
-            'author-get': writing.ncx.author.AuthorGetProcess(),
-            'author-set': writing.ncx.author.AuthorSetProcess(),
-            'format': writing.ncx.FormatFileProcess(),
-            'meta-list': writing.ncx.meta.MetaListProcess(),
-            'meta-remove': writing.ncx.meta.MetaRemoveProcess(),
-            'meta-set': writing.ncx.meta.MetaSetProcess(),
-            'nav-append': writing.ncx.nav.NavAppendProcess(),
-            'nav-insert': writing.ncx.nav.NavInsertProcess(),
-            'nav-list': writing.ncx.nav.NavListProcess(),
-            'nav-remove': writing.ncx.nav.NavRemoveProcess(),
-            'title-get': writing.ncx.title.TitleGetProcess(),
-            'title-set': writing.ncx.title.TitleSetProcess(),
+            'author-get': mfgames_writing.ncx.author.AuthorGetProcess(),
+            'author-set': mfgames_writing.ncx.author.AuthorSetProcess(),
+            'format': mfgames_writing.ncx.FormatFileProcess(),
+            'meta-list': mfgames_writing.ncx.meta.MetaListProcess(),
+            'meta-remove': mfgames_writing.ncx.meta.MetaRemoveProcess(),
+            'meta-set': mfgames_writing.ncx.meta.MetaSetProcess(),
+            'nav-append': mfgames_writing.ncx.nav.NavAppendProcess(),
+            'nav-insert': mfgames_writing.ncx.nav.NavInsertProcess(),
+            'nav-list': mfgames_writing.ncx.nav.NavListProcess(),
+            'nav-remove': mfgames_writing.ncx.nav.NavRemoveProcess(),
+            'title-get': mfgames_writing.ncx.title.TitleGetProcess(),
+            'title-set': mfgames_writing.ncx.title.TitleSetProcess(),
         })
 
 

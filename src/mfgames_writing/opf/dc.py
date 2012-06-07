@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class DublinCoreListProcess(writing.opf.ReportOpfFileProcess):
+class DublinCoreListProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and lists the Dublin Core entries."""
 
     def get_help(self):
@@ -23,7 +21,7 @@ class DublinCoreListProcess(writing.opf.ReportOpfFileProcess):
             print('\t'.join(fields))
 
 
-class DublinCoreRemoveProcess(writing.opf.ManipulateOpfFileProcess):
+class DublinCoreRemoveProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     def get_help(self):
         return "Removes a given Dublin Core fields."
 
@@ -44,7 +42,7 @@ class DublinCoreRemoveProcess(writing.opf.ManipulateOpfFileProcess):
             help="The Dublin Core field, without the leading dc: (e.g., Creator)")
 
 
-class DublinCoreSetProcess(writing.opf.ManipulateOpfFileProcess):
+class DublinCoreSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Scans the OPF file and lists the Dublin Core entries."""
 
     def get_help(self):

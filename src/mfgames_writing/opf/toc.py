@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class TocGetProcess(writing.opf.ReportOpfFileProcess):
+class TocGetProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and gets the TOC entries."""
 
     def get_help(self):
@@ -21,7 +19,7 @@ class TocGetProcess(writing.opf.ReportOpfFileProcess):
         print('\t'.join(fields))
 
 
-class TocSetProcess(writing.opf.ManipulateOpfFileProcess):
+class TocSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Sets the toc to a manifest entry."""
 
     def get_help(self):

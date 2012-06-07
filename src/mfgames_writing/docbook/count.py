@@ -2,14 +2,12 @@
 producing output based on its contents."""
 
 
+import mfgames_tools.process
+import mfgames_writing.docbook.scan
+import mfgames_writing.format
 import os
 import sys
 import xml
-
-import tools.args
-import tools.process
-import writing.docbook.scan
-import writing.format
 
 
 class _CountScanner(xml.sax.ContentHandler):
@@ -127,7 +125,8 @@ class _CountScanner(xml.sax.ContentHandler):
             self.process.counts[filename] = [0, 0]
             self.process.order.append(filename)
 
-class CountProcess(tools.process.InputFilesProcess):
+
+class CountProcess(mfgames_tools.process.InputFilesProcess):
     """Scans the DocBook file and produces counts of various elements
     such as words, sentences, and paragraphs."""
 
@@ -248,7 +247,7 @@ class CountProcess(tools.process.InputFilesProcess):
             table.append(self.get_columns("_total", "Total"))
 
         # Format and output the table to the standard out.
-        writing.format.output_table(sys.stdout, table, args.format)
+        mfgames_writing.format.output_table(sys.stdout, table, args.format)
 
     def process_filename(self, filename):
         """Processes a single file and counts the appropriate
@@ -281,16 +280,16 @@ class CountProcess(tools.process.InputFilesProcess):
             choices=['files', 'chapters'])
         parser.add_argument(
             '--total',
-            default=True,
-            action=tools.args.BooleanAction)
+            default=False,
+            action='store_true')
         parser.add_argument(
             '--average',
             default=False,
-            action=tools.args.BooleanAction)
+            action='store_true')
         parser.add_argument(
             '--headers',
             default=False,
-            action=tools.args.BooleanAction)
+            action='store_true')
         parser.add_argument(
             '--format',
             '-f',
@@ -300,15 +299,18 @@ class CountProcess(tools.process.InputFilesProcess):
         parser.add_argument(
             '--words',
             '-w',
+            default=False,
             action='store_true',
             help="Include the word count column.")
         parser.add_argument(
             '--paragraphs',
             '-p',
+            default=False,
             action='store_true',
             help="Include the paragraph count column.")
         parser.add_argument(
             '--columns',
             '-c',
-            action='store',
+            default=False,
+            action='store_true',
             help="Include the paragraph count column.")

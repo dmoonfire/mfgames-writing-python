@@ -5,12 +5,11 @@ from xml.dom.minidom import Document
 import abc
 import codecs
 import datetime
+import mfgames_tools.process
 import os
 import re
 import sys
 import xml.sax
-
-import tools.process
 
 
 class _OpfScanner(xml.sax.ContentHandler):
@@ -105,7 +104,7 @@ class Opf():
         self.uid_id = None
 
 
-class InputOpfFileProcess(tools.process.InputFileProcess):
+class InputOpfFileProcess(mfgames_tools.process.InputFileProcess):
     """Imports the OPF file into memory."""
 
     def __init__(self):

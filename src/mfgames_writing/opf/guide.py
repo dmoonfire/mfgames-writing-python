@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class GuideListProcess(writing.opf.ReportOpfFileProcess):
+class GuideListProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and lists the guide entries."""
 
     def get_help(self):
@@ -28,7 +26,7 @@ class GuideListProcess(writing.opf.ReportOpfFileProcess):
             print('\t'.join(self.parts))
 
 
-class GuideRemoveProcess(writing.opf.ManipulateOpfFileProcess):
+class GuideRemoveProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     def get_help(self):
         return "Removes an entry in the guide."
 
@@ -48,7 +46,7 @@ class GuideRemoveProcess(writing.opf.ManipulateOpfFileProcess):
             help="The type for the guide entry")
 
 
-class GuideSetProcess(writing.opf.ManipulateOpfFileProcess):
+class GuideSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Sets an item in the guide"""
 
     def get_help(self):

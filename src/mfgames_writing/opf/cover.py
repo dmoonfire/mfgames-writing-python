@@ -2,15 +2,13 @@
 
 
 import codecs
+import mfgames_writing.opf
 import os
 import sys
 import xml
 
-import tools.process
-import writing.opf
 
-
-class CoverGetProcess(writing.opf.ReportOpfFileProcess):
+class CoverGetProcess(mfgames_writing.opf.ReportOpfFileProcess):
     """Scans the OPF file and gets the TOC entries."""
 
     def get_help(self):
@@ -21,7 +19,7 @@ class CoverGetProcess(writing.opf.ReportOpfFileProcess):
         print('\t'.join(fields))
 
 
-class CoverSetProcess(writing.opf.ManipulateOpfFileProcess):
+class CoverSetProcess(mfgames_writing.opf.ManipulateOpfFileProcess):
     """Sets the cover to a manifest entry."""
 
     def get_help(self):
