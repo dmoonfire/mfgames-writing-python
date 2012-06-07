@@ -31,7 +31,7 @@ class ConvertToTextFilesProcess(
         self.line_prefix = ''
         self.supress_newline = False
         self.path = []
-        self.attribution= ''
+        self.attribution = ''
 
     def convert_file(self, args, input_filename, output_filename):
         """

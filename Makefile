@@ -15,7 +15,7 @@ check:
 	PYTHONPATH=src pylint \
 		--reports=no \
 		--include-ids=yes \
-		--disable-msg=R0904,C0103,R0902,R0201,R0903,R0915,R0914 \
-		$(PYTHON_FILES) 2> /dev/null
+		--disable=R0904,C0103,R0902,R0201,R0903,R0915,R0914,R0801 \
+		$(shell find src -name "*.py")
 
 	cd test && PYTHONPATH=../src ./run_tests.py
