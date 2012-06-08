@@ -165,14 +165,14 @@ class ManipulateNcxFileProcess(InputNcxFileProcess):
         self.manipulate()
 
         # If the output file is not defined, write it in place.
-        if self.args.output == None:
-            self.args.output = self.args.file
+        if args.output == None:
+            args.output = args.file
 
         # Get the handle to the output.
-        if self.args.output == "-":
+        if args.output == "-":
             output = sys.stdout
         else:
-            output = codecs.open(self.args.output, 'w', 'utf-8')
+            output = codecs.open(args.output, 'w', 'utf-8')
 
         # Write the resulting file out to the given stream.
         self.write_output(output)
