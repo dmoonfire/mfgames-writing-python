@@ -107,7 +107,7 @@ class InputNcxFileProcess(mfgames_tools.process.InputFileProcess):
         scanner = _NcxScanner(self.ncx)
         parser = xml.sax.make_parser()
         parser.setContentHandler(scanner)
-        parser.parse(codecs.open(args.file, 'r', 'utf-8'))
+        parser.parse(args.file)
 
 
 class ReportNcxFileProcess(InputNcxFileProcess):

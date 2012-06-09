@@ -1,4 +1,4 @@
-"""Handles processes for manipulating Creole files."""
+"""Contains the processing of Creole file."""
 
 
 import codecs

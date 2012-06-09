@@ -8,19 +8,19 @@ import logging
 import mfgames_tools.process
 import os
 import shutil
+import sys
 import xml.sax
 import xml.sax.saxutils
-import xml.sax.xmlreader
 
 
-class _DocBookScanner(xml.sax.saxutils.XMLGenerator):
+class _DocBookScanner(xml.sax.ContentHandler):
     """Scans a DocBook file and merges them into the appropriate output."""
 
     def __init__(self,
                  args,
                  input_filename, output_filename, output_stream,
                  is_included):
-        xml.sax.saxutils.XMLGenerator.__init__(self, output_stream, 'utf-8')
+        xml.sax.ContentHandler.__init__(self)
 
         self.args = args
         self.log = logging.getLogger(os.path.basename(input_filename))
@@ -47,13 +47,14 @@ class _DocBookScanner(xml.sax.saxutils.XMLGenerator):
         if self.skip > 0:
             return
 
-        xml.sax.saxutils.XMLGenerator.characters(self, text)
+        escaped = xml.sax.saxutils.escape(text)
+        self.output_stream.write(escaped)
 
     def startDocument(self):
         # If we are not included, then prevent the <?xml?> from being
         # written out.
         if not self.is_included:
-            xml.sax.saxutils.XMLGenerator.startDocument(self)
+            xml.sax.ContentHandler.startDocument(self)
 
     def startElement(self, name, attrs):
         # Check to see if we are skipping elements.
@@ -199,8 +200,8 @@ class _DocBookScanner(xml.sax.saxutils.XMLGenerator):
             # so just skip it.
             return
 
-        # Just pass it on to the content generator.
-        xml.sax.saxutils.XMLGenerator.endElement(self, name)
+        # Just finish off the tag.
+        self.output_stream.write("</{0}>".format(name))
 
 
 class GatherFileProcess(mfgames_tools.process.InputFileProcess):
