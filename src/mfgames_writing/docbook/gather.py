@@ -85,7 +85,7 @@ class _DocBookScanner(xml.sax.ContentHandler):
                 True)
             parser = xml.sax.make_parser()
             parser.setContentHandler(scanner)
-            parser.parse(codecs.open(include_filename, 'r', 'utf-8'))
+            parser.parse(include_filename)
 
             # We don't continue on, so return.
             return
