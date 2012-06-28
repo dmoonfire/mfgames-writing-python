@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<article
+	xmlns="http://docbook.org/ns/docbook"
+	xmlns:xinclude="http://www.w3.org/2001/XInclude"
+	version="5.0">
+  <info>
+	<title>Article Title</title>
+  </info>
+
+  <para>This is an article. It should have a section which has an
+  inner section.</para>
+</article>

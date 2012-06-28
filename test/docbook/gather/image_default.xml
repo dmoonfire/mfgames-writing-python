@@ -21,6 +21,4 @@
 		 fileref="images/cover-large.png"/>
     </imageobject>
   </mediaobject>
-
-  <xinclude:include href="r1.xml"/>
 </article>

@@ -77,35 +77,51 @@ class DocbookCreoleTests(unittest.TestCase):
 
     def test_one_h1(self):
         self.run_tool(
-            'docbook/docbook_creole_one_h1',
+            'docbook/creole/one_h1',
             ['creole'])
 
     def test_two_h2(self):
         self.run_tool(
-            'docbook/docbook_creole_two_h2',
+            'docbook/creole/two_h2',
             ['creole'])
 
     def test_long_para(self):
         self.run_tool(
-            'docbook/docbook_creole_long_para',
+            'docbook/creole/long_para',
             ['creole', '--columns', '70'])
 
     def test_indented_para(self):
         self.run_tool(
-            'docbook/docbook_creole_indented_para',
+            'docbook/creole/indented_para',
             ['creole', '--columns', '70'])
 
     def test_subjectset(self):
         self.run_tool(
-            'docbook/docbook_creole_subjectset',
+            'docbook/creole/subjectset',
             ['creole',
              '--subjectset-position', 'section-top',
              '--subjectset-format', 'list'])
 
     def test_quotes(self):
         self.run_tool(
-            'docbook/docbook_creole_quotes',
+            'docbook/creole/quotes',
             ['creole', '--columns', '70', '--quotes', 'simple'])
+
+    def test_accent(self):
+        self.run_tool(
+            'docbook/creole/accent',
+            ['creole', '--columns', '70'])
+
+    # def test_gather1(self):
+    #     self.clean_temp()
+    #     self.run_tool(
+    #         'docbook/gather/simple',
+    #         ['gather'])
+
+    def test_gather1(self):
+        self.run_tool(
+            'docbook/gather/simple',
+            ['gather'])
 
 #
 # Entry
