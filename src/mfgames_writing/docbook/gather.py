@@ -271,7 +271,7 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
         scanner = _DocBookScanner(args, args.file, args.output, output, False)
         parser = xml.sax.make_parser()
         parser.setContentHandler(scanner)
-        parser.parse(codecs.open(args.file, 'r', 'utf-8'))
+        parser.parse(args.file)
         output.close()
 
 
