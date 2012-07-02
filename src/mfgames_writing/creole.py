@@ -589,6 +589,8 @@ class DocbookMetadataParser(object):
                     buf.append(self.create_author(value))
                 elif key == 'Copyright':
                     buf.append(self.create_copyright(value))
+                elif key == 'Date':
+                    buf.append(self.create_date(value))
                 else:
                     buf.append(self.create_subjectset(key, value))
 
@@ -637,6 +639,17 @@ class DocbookMetadataParser(object):
 
         # Return the resulting string.
         return "".join(buf)
+
+    def create_date(self, value):
+        """
+        Create an <date> tag that represents the given date.
+        """
+
+        # Split on the comma for the name
+        names = re.split(r'\s*,\s*', value)
+
+        # Return the resulting string.
+        return "<date>" + value + "</date>"
 
     def create_copyright(self, value):
         """
