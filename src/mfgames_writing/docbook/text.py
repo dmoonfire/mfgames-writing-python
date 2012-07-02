@@ -124,6 +124,10 @@ class ConvertToTextFilesProcess(
             # Write out the structure header.
             self.write_structure()
 
+        # If this is a bridgehead, write it as a break.
+        if name == "bridgehead":
+            self.output.write(os.linesep + '----' + os.linesep)
+
         # If we are starting a quote, add it.
         if name == "quote":
             self.append_quote(True)

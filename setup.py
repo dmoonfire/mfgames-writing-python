@@ -15,7 +15,7 @@ setup(
     # Metadata
     name='mfgames-writing',
     version='0.2.0.0',
-    description='Utilities for manipulating various writing-based formats..',
+    description='Utilities for manipulating various writing-based formats.',
     author='Dylan R. E. Moonfire',
     author_email="contact@mfgames.com",
     url='http://mfgames.com/mfgames-writing',
