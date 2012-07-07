@@ -12,7 +12,19 @@ import xml
 
 
 # The namespaces used as part of the XPath queries.
-xml_ns = {'d': "http://docbook.org/ns/docbook"}
+docbook_ns = "http://docbook.org/ns/docbook"
+docbook_lxml_ns = "{%s}" % docbook_ns
+xml_ns = {'d': docbook_ns }
+
+
+def _get_element_value(node, tag, default):
+    """Tries to get the first text element of the given tag, or the
+    default value if one cannot be found."""
+
+    for child in node.getiterator(docbook_lxml_ns + tag):
+        return child.text
+
+    return default
 
 
 class ExtractSubjectsetsProcess(mfgames_tools.process.InputFilesProcess):
@@ -152,8 +164,19 @@ class QueryProcess(mfgames_tools.process.InputFilesProcess):
 
         # Go through all the author tags and add a formatted version.
         for info in xml.xpath("//d:personname", namespaces=xml_ns):
+            # Pull out the components of the name.
+            firstname = _get_element_value(info, "firstname", None)
+            surname = _get_element_value(info, "surname", None)
+
+            name = surname
             
-            print info
+            if firstname:
+                name += ", " + firstname
+
+            # Pull the name back in.
+            fullname = lxml.etree.Element(docbook_lxml_ns + "fullname")
+            fullname.text = name
+            info.append(fullname)
 
     def select_file(self, xml):
         """Retrieves the fields from the given XML file and writes it
