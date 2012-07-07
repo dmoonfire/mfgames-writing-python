@@ -178,6 +178,23 @@ class QueryProcess(mfgames_tools.process.InputFilesProcess):
             fullname.text = name
             info.append(fullname)
 
+        # Go through all the info tags and add a formatted version of
+        # the titles.
+        for info in xml.xpath("//d:info", namespaces=xml_ns):
+            # Pull out the components of the name.
+            title = _get_element_value(info, "title", None)
+            subtitle = _get_element_value(info, "subtitle", None)
+
+            combined = title
+            
+            if subtitle:
+                combined += ": " + subtitle
+
+            # Pull the name back in.
+            fulltitle = lxml.etree.Element(docbook_lxml_ns + "fulltitle")
+            fulltitle.text = combined
+            info.append(fulltitle)
+
     def select_file(self, xml):
         """Retrieves the fields from the given XML file and writes it
         out to the stream."""
