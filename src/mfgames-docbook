@@ -25,6 +25,8 @@ def do_docbook_tool(arguments):
                 mfgames_writing.docbook.gather.GatherFileProcess(),
             'subjectsets':
                 mfgames_writing.docbook.info.ExtractSubjectsetsProcess(),
+            'query':
+                mfgames_writing.docbook.info.QueryProcess(),
         })
 
 

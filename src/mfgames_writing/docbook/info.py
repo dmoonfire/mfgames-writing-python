@@ -2,12 +2,17 @@
 producing output based on its contents."""
 
 
+import lxml.etree
 import codecs
 import mfgames_tools
 import mfgames_writing.docbook.scan
 import os
 import sys
 import xml
+
+
+# The namespaces used as part of the XPath queries.
+xml_ns = {'d': "http://docbook.org/ns/docbook"}
 
 
 class ExtractSubjectsetsProcess(mfgames_tools.process.InputFilesProcess):
@@ -102,3 +107,105 @@ class ExtractSubjectsetsProcess(mfgames_tools.process.InputFilesProcess):
             help="If not set to 'no', will chunk at chapters using the "
                 + "value with substituting {id} and {number} in the string.")
 
+
+class QueryProcess(mfgames_tools.process.InputFilesProcess):
+    """
+    Scans and filters one or more DocBook files and outputs data from
+    those results.
+    """
+
+    def __init__(self):
+        super(QueryProcess, self).__init__()
+
+    def get_help(self):
+        return "Scans DocBook and outputs the results."
+
+    def process(self, args):
+        # Call the parent class' implementation which ensures all the
+        # files exists and sets up the internal arguments.
+        super(QueryProcess, self).process(args)
+
+        # Go through all the input files.
+        for filename in args.files:
+            self.process_file(filename)
+
+    def process_file(self, input_filename):
+        """Processes a single DocBook 5 file and determines if it
+        should be filtered out, if not, then it outputs the
+        results."""
+
+        # Load the entire XML file into memory.
+        xml = lxml.etree.parse(input_filename)
+
+        # Make some virtual nodes into the XML.
+        self.add_virtual_elements(xml, input_filename)
+
+        # TODO: Perform the where clause to filter it out.
+
+        # If we got this far, this file needs to have its fields
+        # written out.
+        self.select_file(xml)
+
+    def add_virtual_elements(self, xml, filename):
+        """Adds in virtual elements into the XML tree to represent
+        information about the file or formatting."""
+
+        # Go through all the author tags and add a formatted version.
+        for info in xml.xpath("//d:personname", namespaces=xml_ns):
+            
+            print info
+
+    def select_file(self, xml):
+        """Retrieves the fields from the given XML file and writes it
+        out to the stream."""
+
+        # Go through the select expressions and process each one.
+        fields = []
+
+        # Get the root for the select query and keep it since we'll
+        # loop through these quite a few times (once per field).
+        select_roots = xml.xpath(self.args.select_root, namespaces=xml_ns)
+
+        # Go through each of the select queries first. We treat these
+        # as a single field which we'll combine together.
+        for select_xpath in self.args.select:
+            # Create a list of results we find from this field, which
+            # we'll combine together into a single "field".
+            values = []
+
+            # Loop through all the resulting root nodes so we can do a
+            # xpath against the root.
+            for select_root in select_roots:
+                # Perform the query on the select root for the path.
+                selects = select_root.xpath(select_xpath, namespaces=xml_ns)
+
+                for select in selects:
+                    values.append(select.text)
+
+            # Once we finish gathering up all the values, we combine
+            # them together and add it to the resulting output fields.
+            value_string = ", ".join(values)
+            fields.append(value_string)
+
+        # Output the resulting fields to the output stream.
+        print "\t".join(fields)
+
+    def setup_arguments(self, parser):
+        """Sets up the command-line arguments for file processing."""
+
+        # Add in the argument from the base class.
+        super(QueryProcess, self).setup_arguments(parser)
+
+        # Add in the text-specific generations.
+        parser.add_argument(
+            '--select-root',
+            default="/*/d:info",
+            type=str,
+            help="The XPath to the root element for the base of "
+            + "all the select queries.")
+        parser.add_argument(
+            '--select', '-s',
+            default=['d:title'],
+            type=str,
+            nargs='+',
+            help="The relative XPath elements to return in the results.")
