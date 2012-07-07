@@ -628,14 +628,14 @@ class DocbookMetadataParser(object):
         # Create the XML tag for the surname which we always
         # include. If we have a second name, we treat add it as the
         # first name.
-        buf = ['<author><surname>', names[0], '</surname>']
+        buf = ['<author><personname><surname>', names[0], '</surname>']
 
         if len(names) > 1:
             buf.append('<firstname>')
             buf.append(names[1])
             buf.append('</firstname>')
 
-        buf.append('</author>')
+        buf.append('</personname></author>')
 
         # Return the resulting string.
         return "".join(buf)
