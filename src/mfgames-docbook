@@ -26,6 +26,8 @@ def do_docbook_tool(arguments):
                 mfgames_writing.docbook.text.ConvertToCreoleFilesProcess(),
             'gather':
                 mfgames_writing.docbook.gather.GatherFileProcess(),
+            'xinclude':
+                mfgames_writing.docbook.gather.XIncludeFileProcess(),
             'subjectsets':
                 mfgames_writing.docbook.info.ExtractSubjectsetsProcess(),
             'query':
