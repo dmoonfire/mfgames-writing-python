@@ -90,6 +90,26 @@ class _DocBookScanner(xml.sax.ContentHandler):
             # We don't continue on, so return.
             return
 
+        # If this is a book, we need to figure if we need to change
+        # the --book-chapters argument to convert elements. If we
+        # defined a type, then any article or chapter we encounter, we
+        # remap to the proper type.
+        if name == "book" and self.args.book_chapters == "auto":
+            # Assume we are converting them to chapters.
+            self.args.book_chapters = "chapter"
+
+            # If there is a role, use that to determine if we are
+            # going to use articles.
+            if "role" in attrs:
+                role = attrs["role"]
+
+                if role == "stories" or role == "magazine":
+                    self.args.book_chapters = "article"
+
+        if name == "article" or name == "chapter":
+            if self.args.book_chapters != "auto":
+                name = self.args.book_chapters
+
         # If we have a media object, we start up the selector that
         # will pick the first one that we can use (and skip the ones
         # we can't and also skip the ones after).
@@ -199,6 +219,13 @@ class _DocBookScanner(xml.sax.ContentHandler):
             # When we get this, we are done parsing the include file,
             # so just skip it.
             return
+
+        # If we are mapping book chapters to either chapter or
+        # article, then we need to change the name to the proper
+        # type.
+        if name == "article" or name == "chapter":
+            if self.args.book_chapters != "auto":
+                name = self.args.book_chapters
 
         # Just finish off the tag.
         self.output_stream.write("</{0}>".format(name))
@@ -334,6 +361,12 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
             '--media-directory',
             type=str,
             help="If set, then media files will be copied here instead of the output. This can be a relative path to the output directory.")
+        parser.add_argument(
+            '--book-chapters',
+            type=str,
+            default='auto',
+            choices=['auto', 'article', 'chapter'],
+            help="While gathering articles or chapters under a book, convert them to a known type. 'auto' means use the @role of the book.")
 
     def get_help(self):
         return "Merges a DocBook file and all includes and gathers up external resources such as images."

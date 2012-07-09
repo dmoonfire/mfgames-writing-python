@@ -118,10 +118,10 @@ class DocbookCreoleTests(unittest.TestCase):
     #         'docbook/gather/simple',
     #         ['gather'])
 
-    def test_gather1(self):
-        self.run_tool(
-            'docbook/gather/simple',
-            ['gather'])
+    #def test_gather1(self):
+    #    self.run_tool(
+    #        'docbook/gather/simple',
+    #        ['gather'])
 
 #
 # Entry
