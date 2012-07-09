@@ -27,6 +27,16 @@ def _get_element_value(node, tag, default):
     return default
 
 
+def _get_element_node(node, tag, default):
+    """Tries to get the first text element of the given tag, or the
+    default value if one cannot be found."""
+
+    for child in node.getiterator(docbook_lxml_ns + tag):
+        return child
+
+    return default
+
+
 class ExtractSubjectsetsProcess(mfgames_tools.process.InputFilesProcess):
     """Scans the DocBook file and extracts the subject sets."""
 
