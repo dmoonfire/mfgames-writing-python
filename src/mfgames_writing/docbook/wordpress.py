@@ -154,11 +154,19 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
         content['custom_fields'] = custom_fields
 
         # Create the page on the server.
-        self.proxy.wp.newPost(
+        post_id = self.proxy.wp.newPost(
             self.args.blog,
             self.args.username,
             self.args.password,
             content)
+
+        # Download the page and add it into the list.
+        post = self.proxy.wp.getPost(
+            self.args.blog,
+            self.args.username,
+            self.args.password,
+            post_id)
+        self.pages[rel_filename] = post
 
     def get_file_hash(self, filename, block_size = 2**20):
         """Retrieves the SHA-256 hash of the given filename."""

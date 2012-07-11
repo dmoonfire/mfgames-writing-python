@@ -38,6 +38,7 @@ setup(
     scripts=[
         'src/mfgames-creole',
         'src/mfgames-docbook',
+        'src/mfgames-docbook-wordpress',
         'src/mfgames-ncx',
         'src/mfgames-opf',
         ],
