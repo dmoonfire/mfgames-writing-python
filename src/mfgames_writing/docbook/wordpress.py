@@ -25,7 +25,7 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
     def get_help(self):
         return "Uploads files to a WordPress site."
 
-    def process(self, args):
+    def pre_process_file(self):
         # Set up logging for the process.
         logging.basicConfig(
             format = "%(asctime)-15s %(message)s",
@@ -33,29 +33,30 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
         self.log = logging.getLogger('docbook-wordpress')
 
         # Load the stylesheet.
-        xslt = lxml.etree.parse(args.xslt)
+        xslt = lxml.etree.parse(self.args.xslt)
         self.transform = lxml.etree.XSLT(xslt)
 
         # Set up the XMLRPC proxy for this site.
-        self.proxy = xmlrpclib.ServerProxy(args.url)
+        self.proxy = xmlrpclib.ServerProxy(self.args.url)
 
         # Retrieve all the pages on the website.
-        self.get_options(args)
-        self.cache_pages(args)
-        self.cache_taxonomies(args)
+        self.get_options()
+        self.cache_pages()
+        self.cache_taxonomies()
 
         # Call the base implementation which will also process each
         # file.
-        super(UploadFilesProcess, self).process(args)
+        super(UploadFilesProcess, self).pre_process_file()
 
-    def process_file(self, args, filename):
+    def process_file(self, filename):
         # Parse the file as an XML object so we can pull out elements.
         xml = lxml.etree.parse(filename)
 
         # Strip off the common part of the root directory from the
         # filename, since this is the relative path inside the
         # WordPress site.
-        abs_root_directory = os.path.abspath(args.root_directory) + os.path.sep
+        abs_root_directory = (
+            os.path.abspath(self.args.root_directory) + os.path.sep)
         abs_filename = os.path.abspath(filename)
 
         if not abs_filename.startswith(abs_root_directory):
@@ -290,30 +291,30 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             datetime.datetime.strptime(date, "%Y-%m-%d"))
         return xmldate
 
-    def get_options(self, args):
+    def get_options(self):
         """Retrieves a list of options from the server."""
 
         self.log.info("Getting options from the server")
 
         self.options = self.proxy.wp.getOptions(
-            args.blog,
-            args.username,
-            args.password)
+            self.args.blog,
+            self.args.username,
+            self.args.password)
 
         # Break out some useful elements.
         self.blog_url = self.options['blog_url']['value']
         self.log.debug("  Using blog url: " + self.blog_url)
 
-    def cache_taxonomies(self, args):
+    def cache_taxonomies(self):
         """Downloads a list of all taxonomies and saves the results to
         handle verification and uploading."""
 
         self.log.info("Downloading taxonomies from the server")
 
         taxonomies = self.proxy.wp.getTaxonomies(
-            args.blog,
-            args.username,
-            args.password)
+            self.args.blog,
+            self.args.username,
+            self.args.password)
 
         # Go through each of the taxonomies, filter out the ones we
         # can't use, and store the remaining ones inside the object so
@@ -329,9 +330,9 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             taxonomy['terms'] = {}
 
             terms = self.proxy.wp.getTerms(
-                args.blog,
-                args.username,
-                args.password,
+                self.args.blog,
+                self.args.username,
+                self.args.password,
                 taxonomy['name'])
 
             for term in terms:
@@ -342,7 +343,7 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             self.taxonomies[taxonomy_name] = taxonomy
             self.log.debug("  Loaded taxonomy: " + taxonomy_name)
 
-    def cache_pages(self, args):
+    def cache_pages(self):
         """Downloads a list of pages from the server so it can be cached."""
 
         self.log.info("Downloading pages from the server")
@@ -353,9 +354,9 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             }
 
         posts = self.proxy.wp.getPosts(
-            args.blog,
-            args.username,
-            args.password,
+            self.args.blog,
+            self.args.username,
+            self.args.password,
             wp_filter)
 
         # Go through each of the posts and cache each one using the
@@ -433,7 +434,6 @@ class GetPostProcess(mfgames_tools.process.Process):
         self.proxy = xmlrpclib.ServerProxy(args.url)
 
         # Get the page from the server.
-        print self.args
         post = self.proxy.wp.getPost(
             self.args.blog,
             self.args.username,
