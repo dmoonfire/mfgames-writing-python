@@ -315,7 +315,6 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
         parser.parse(args.file)
         output.close()
 
-
     def setup_arguments(self, parser):
         """Sets up the command-line arguments for processing."""
 

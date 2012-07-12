@@ -86,9 +86,6 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             self.create_page(filename, rel_filename, xml, file_hash)
 
     def update_page(self, filename, rel_filename, xml, post, file_hash):
-        # Report that we're creating a page.
-        self.log.info("Updating page: " + rel_filename)
-
         # Pull out some useful variables.
         post = self.pages[rel_filename]
         post_id = post['post_id']
@@ -100,11 +97,14 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             if custom_field['key'] == "mfgames-docbook-sha256":
                 # If the value is the same, we don't change it.
                 if not self.args.force and custom_field['value'] == file_hash:
-                    self.log.info("  Unchanged because of hash, skipping")
+                    self.log.info("Skipping because of hash: " + rel_filename)
                     return
 
                 # Break out since we found what we're looking for.
                 break
+
+        # Report that we're creating a page.
+        self.log.info("Updating page: " + rel_filename)
 
         # Create the content element for this page.
         content = self.get_wp_content(xml)
