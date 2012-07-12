@@ -223,6 +223,12 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             # Using the schema name, pull out the taxonomy.
             schema = subjectset.attrib['schema']
 
+            # Check to see if we are excluding the taxonomies.
+            if schema in self.args.exclude_taxonomy:
+                continue
+
+            # If we are including it and we can't find it, then report
+            # it to the user.
             if not schema in self.taxonomies:
                 self.log.warning("  Cannot find taxonomy: " + schema)
                 continue
@@ -392,6 +398,9 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             '--comments',
             default='open',
             choices=['open', 'closed'])
+        parser.add_argument(
+            '--exclude-taxonomy',
+            nargs='+')
 
         # Directory processing.
         parser.add_argument(
