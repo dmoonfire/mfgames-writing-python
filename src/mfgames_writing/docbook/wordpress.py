@@ -200,6 +200,7 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             'post_except': '',
             'post_content': self.get_content(xml),
             'terms_names': taxonomies,
+            'comment_status': self.args.comments,
             }
 
         # Add the date, if we have one.
@@ -385,6 +386,12 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             type=str,
             default="")
 
+        # Post preferences.
+        parser.add_argument(
+            '--comments',
+            default='open',
+            choices=['open', 'closed'])
+
         # Directory processing.
         parser.add_argument(
             '--root-directory', '-d',
@@ -400,3 +407,60 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             '--force', '-f',
             default=False,
             action='store_true')
+
+
+class GetPostProcess(mfgames_tools.process.Process):
+    """Retrieves a single post and information about it from the server."""
+
+    def __init__(self):
+        super(GetPostProcess, self).__init__()
+
+    def get_help(self):
+        return "Downloads a post from a WordPress site."
+
+    def process(self, args):
+        # Call the base implementation which will also process each
+        # file.
+        super(GetPostProcess, self).process(args)
+
+        # Set up logging for the process.
+        logging.basicConfig(
+            format = "%(asctime)-15s %(message)s",
+            level = logging.DEBUG)
+        self.log = logging.getLogger('docbook-wordpress')
+
+        # Set up the XMLRPC proxy for this site.
+        self.proxy = xmlrpclib.ServerProxy(args.url)
+
+        # Get the page from the server.
+        print self.args
+        post = self.proxy.wp.getPost(
+            self.args.blog,
+            self.args.username,
+            self.args.password,
+            self.args.post)
+        print post
+
+    def setup_arguments(self, parser):
+        # Add in the argument from the base class.
+        super(GetPostProcess, self).setup_arguments(parser)
+
+        # WordPress arguments
+        parser.add_argument(
+            '--url', '-l',
+            type=str)
+        parser.add_argument(
+            '--user', '-U',
+            type=str)
+        parser.add_argument(
+            '--pass', '-P',
+            type=str)
+        parser.add_argument(
+            '--blog', '-B',
+            type=str,
+            default="")
+
+        # Post
+        parser.add_argument(
+            'post',
+            type=str)

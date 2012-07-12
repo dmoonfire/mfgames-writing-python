@@ -13,6 +13,7 @@ sys.setdefaultencoding('utf-8')
 def do_docbook_wordpress_tool(arguments):
     processes = {
         'upload': mfgames_writing.docbook.wordpress.UploadFilesProcess(),
+        'get': mfgames_writing.docbook.wordpress.GetPostProcess(),
         }
 
     mfgames_tools.run_tool(
