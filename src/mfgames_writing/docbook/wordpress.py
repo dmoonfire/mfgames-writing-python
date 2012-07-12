@@ -20,7 +20,12 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
     needed."""
 
     def __init__(self):
+        # Let the base classes do what they need to do.
         super(UploadFilesProcess, self).__init__()
+
+        # Keep track of the taxonomies we cached and their values.
+        self.taxonomies = {}
+        self.taxonomies_cached = []
 
     def get_help(self):
         return "Uploads files to a WordPress site."
@@ -312,42 +317,24 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
         self.log.debug("  Using blog url: " + self.blog_url)
 
     def cache_taxonomies(self):
-        """Downloads a list of all taxonomies and saves the results to
-        handle verification and uploading."""
+        """Downloads the master list of taxonomies from the server."""
 
-        self.log.info("Downloading taxonomies from the server")
+        # Report what we're doing.
+        self.log.debug("Downloading taxonomies")
 
+        # We need to cache the basic taxonomy information.
         taxonomies = self.proxy.wp.getTaxonomies(
             self.args.blog,
             self.args.username,
             self.args.password)
 
-        # Go through each of the taxonomies, filter out the ones we
-        # can't use, and store the remaining ones inside the object so
-        # we can use them later.
-        self.taxonomies = {}
-
         for taxonomy in taxonomies:
-            # If it can't be applied to a page, we don't use it.
-            if not 'page' in taxonomy["object_type"]:
-                continue
-
-            # Retrieve all the terms for a taxonomy.
+            # Add in the stubs for the terms.
             taxonomy['terms'] = {}
 
-            terms = self.proxy.wp.getTerms(
-                self.args.blog,
-                self.args.username,
-                self.args.password,
-                taxonomy['name'])
-
-            for term in terms:
-                taxonomy['terms'][term['name']] = term
-
-            # Save the resulting taxonomy into the list.
+            # Get the name so we can save it.
             taxonomy_name = taxonomy['labels']['singular_name']
             self.taxonomies[taxonomy_name] = taxonomy
-            self.log.debug("  Loaded taxonomy: " + taxonomy_name)
 
     def cache_pages(self):
         """Downloads a list of pages from the server so it can be cached."""
