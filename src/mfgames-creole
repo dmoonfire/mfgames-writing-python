@@ -8,6 +8,10 @@ import mfgames_writing.creole
 import sys
 
 
+reload(sys);
+sys.setdefaultencoding('utf-8')
+
+
 def do_creole_tool(arguments):
     mfgames_tools.run_tool(
         'Manipulate and convert Creole files.',

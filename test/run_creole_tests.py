@@ -123,12 +123,17 @@ class CreoleDocbookTests(unittest.TestCase):
     def test_quotes(self):
         self.run_tool(
             'creole/docbook/quotes',
-            ['docbook', '--convert-quotes'])
+            ['docbook', '--convert-quotes=docbook'])
 
     def test_quotes(self):
         self.run_tool(
             'creole/docbook/accent',
             ['docbook'])
+
+    def test_italic_quote(self):
+        self.run_tool(
+            'creole/docbook/italic_quote',
+            ['docbook', '--convert-quotes=docbook'])
 
 #
 # Entry

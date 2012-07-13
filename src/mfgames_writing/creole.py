@@ -7,9 +7,9 @@ import creoleparser.dialects
 import logging
 import mfgames_tools.process
 import mfgames_writing
+import mfgames_writing.type
 import os
 import re
-import smartypants
 import sys
 
 
@@ -79,24 +79,13 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         # make it easier to format.
         contents = re.sub(r'\n[=-]+\n', r'\n-\n', contents)
 
-        # Normalize the construct of '"something-"' into something
-        # SmartyPants can handle.
-        contents = contents.replace('-"', '--"')
-        contents = contents.replace('"-', '"--')
-    
-        # Change the typographical quotes into something aesthetic. We
-        # do this before converting from Creole because of the tags
-        # created by that parser potentially have quotes
-        # themselves. We split this into different elements to speed
-        # up the regex as part of the conversion.
-        log.debug('Formatting normal quotes into typographic ones')
-        parts = unicode.split(contents, '\n\n')
+        # Convert the fancy quotes we may have in the input back to
+        # standard quotes.
+        contents = contents.replace('&#8220;', '"')
+        contents = contents.replace('&#8221;', '"')
+        contents = contents.replace('&#8219;', "'")
+        contents = contents.replace('&#8216;', "'")
 
-        for index in range(len(parts)):
-            parts[index] = smartypants.smartyPants(parts[index])
-
-        contents = '\n\n'.join(parts)
-    
         # Convert the file into an XML string using the Creole parser.
         log.debug('Converting Creole to XML')
 
@@ -130,12 +119,20 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         # Convert the typographical quotes into formatted quotes. If
         # the user has requested they be converted into Docbook
         # <quote> tags, we do that now.
-        log.debug('Changing quotes into DocBook quote tags')
-        contents = re.sub(r'&amp;#(\d+);', r'&#\1;', contents)
-        
-        if args.convert_quotes:
-            contents = re.sub(r'&#8220;', '<quote>', contents)
-            contents = re.sub(r'&#8221;', '</quote>', contents)
+        typographical = mfgames_writing.type.DocBookTypographicalConvertor()
+
+        if self.args.convert_quotes == 'ascii':
+            log.debug('Changing quotes into ASCII representations')
+            typographical.use_ascii()
+            contents = typographical.convert(contents)
+        elif self.args.convert_quotes == 'unicode':
+            log.debug('Changing quotes into Unicode representations')
+            typographical.use_unicode()
+            contents = typographical.convert(contents)
+        elif self.args.convert_quotes == 'docbook':
+            log.debug('Changing quotes into DocBook quote elements')
+            typographical.use_docbook()
+            contents = typographical.convert(contents)
 
         # Normalize the whitespace and trim the leading spaces.
         log.debug('Normalizing whitespace and paragraphs')
@@ -315,7 +312,9 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
             help='Assigns the id to the top-level generated DocBook element.')
         parser.add_argument(
             '--convert-quotes',
-            action='store_true',
+            type=str,
+            default='skip',
+            choices=['skip', 'ascii', 'unicode', 'docbook'],
             help='Converts double quotes into Docbook <quote> elements.')
         parser.add_argument(
             '--enable-comments',

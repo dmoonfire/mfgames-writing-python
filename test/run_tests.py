@@ -1,11 +1,15 @@
 #!/usr/bin/env python
 
-#
-# Imports
-#
-
-# System Imports
+import os
+import sys
 import unittest
+
+local_directory = os.path.normpath(os.path.dirname(__file__))
+src_directory = os.path.realpath(local_directory + "/../src")
+
+sys.path.insert(0, src_directory)
+
+import mfgames_writing.type
 
 #
 # Entry
@@ -16,6 +20,7 @@ def run_tests():
     loader = unittest.TestLoader()
     suite = loader.loadTestsFromNames([
         'run_creole_tests',
+        'run_type_tests',
         'run_docbook_tests'
     ])
 
