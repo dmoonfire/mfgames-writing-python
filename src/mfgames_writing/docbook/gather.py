@@ -6,6 +6,7 @@ directory."""
 import codecs
 import logging
 import mfgames_tools.process
+import mfgames_writing
 import os
 import shutil
 import sys
@@ -157,9 +158,18 @@ class _DocBookScanner(xml.sax.ContentHandler):
                 os.path.join(self.input_directory, fileref))
             baseref = os.path.basename(fileref)
 
-            # Figure out where we are going to put the output file.
+            # Figure out where we are going to put the output file. We
+            # include the file hash to the file to handle duplicate
+            # names that are actually different files.
+            file_hash = mfgames_writing.get_file_hash(fileref) + "_"
+
+            if baseref in self.args.exclude_media_hash:
+                file_hash = ""
+            
             outputref = os.path.abspath(
-                os.path.join(self.args.media_directory, baseref))
+                os.path.join(
+                    self.args.media_directory,
+                    file_hash + baseref))
 
             # Make sure the directory exists.
             output_directory = os.path.dirname(outputref)
@@ -356,6 +366,10 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
             default=False,
             action='store_true',
             help="If included, then image files will be copied in the output directory.")
+        parser.add_argument(
+            '--exclude-media-hash', '-x',
+            default=[],
+            nargs="+")
         parser.add_argument(
             '--media-directory',
             type=str,

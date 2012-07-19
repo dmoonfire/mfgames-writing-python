@@ -1,7 +1,6 @@
 """Uses DocBook to managed WordPress pages and sites."""
 
 
-import hashlib
 import codecs
 import datetime
 import logging
@@ -72,7 +71,7 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
         rel_filename = rel_filename.replace(".xml", "")
 
         # Get the hash of the file to determine if we need to change it.
-        file_hash = self.get_file_hash(filename)
+        file_hash = mfgames_writing.get_file_hash(filename)
 
         # Figure out if the page exists already.
         if rel_filename in self.pages:
@@ -173,24 +172,6 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
             self.args.password,
             post_id)
         self.pages[rel_filename] = post
-
-    def get_file_hash(self, filename, block_size = 2**20):
-        """Retrieves the SHA-256 hash of the given filename."""
-
-        stream = open(filename, 'r')
-        file_hash = hashlib.sha256()
-
-        while True:
-            data = stream.read(block_size)
-
-            if not data:
-                break
-
-            file_hash.update(data)
-
-        stream.close()
-
-        return file_hash.hexdigest()
 
     def get_wp_content(self, xml):
         # Pull out the <info/> element.

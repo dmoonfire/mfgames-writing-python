@@ -147,10 +147,6 @@ class QueryProcess(mfgames_tools.process.InputFilesProcess):
         # files exists and sets up the internal arguments.
         super(QueryProcess, self).process(args)
 
-        # Go through all the input files.
-        for filename in args.files:
-            self.process_file(filename)
-
     def process_file(self, input_filename):
         """Processes a single DocBook 5 file and determines if it
         should be filtered out, if not, then it outputs the
@@ -205,6 +201,11 @@ class QueryProcess(mfgames_tools.process.InputFilesProcess):
             fulltitle.text = combined
             info.append(fulltitle)
 
+            # Put in the absolute filename.
+            abspath = lxml.etree.Element(docbook_lxml_ns + "abspath")
+            abspath.text = os.path.abspath(filename)
+            info.append(abspath)
+
     def select_file(self, xml):
         """Retrieves the fields from the given XML file and writes it
         out to the stream."""
@@ -230,7 +231,10 @@ class QueryProcess(mfgames_tools.process.InputFilesProcess):
                 selects = select_root.xpath(select_xpath, namespaces=xml_ns)
 
                 for select in selects:
-                    values.append(select.text)
+                    if isinstance(select, basestring):
+                        values.append(select)
+                    else:
+                        values.append(select.text)
 
             # Once we finish gathering up all the values, we combine
             # them together and add it to the resulting output fields.
