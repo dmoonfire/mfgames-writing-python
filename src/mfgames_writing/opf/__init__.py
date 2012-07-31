@@ -30,12 +30,16 @@ class _OpfScanner(xml.sax.ContentHandler):
     def startElement(self, name, attrs):
         # Process the package
         if name == "package":
-            self.opf.uid_id = attrs["unique-identifier"]
+            self.opf.version = attrs["version"]
+
+            if "unique-identifier" in attrs:
+                self.opf.uid_id = attrs["unique-identifier"]
 
         # Process the manifest elements.
         if name == "item":
             # Save the attributes as the record, keyed by the id.
-            self.opf.manifest_items[attrs["id"]] = attrs
+            self.last_id = attrs["id"]
+            self.opf.manifest_items[self.last_id] = attrs
 
         # Process the guide elements.
         if name == "reference":
@@ -52,7 +56,7 @@ class _OpfScanner(xml.sax.ContentHandler):
         # Process the metadata elements.
         if name == "meta":
             self.buffer_capture = True
-            self.parsed_id = attrs["name"]
+            self.last_id = attrs["name"]
 
         if name.startswith("dc:"):
             # The Dublin Core elements are in the content string.
@@ -95,6 +99,8 @@ class _OpfScanner(xml.sax.ContentHandler):
 
 class Opf():
     def __init__(self):
+        self.version = "1.2"
+
         self.guide_references = {}
         self.manifest_items = {}
         self.metadata_meta = {}
