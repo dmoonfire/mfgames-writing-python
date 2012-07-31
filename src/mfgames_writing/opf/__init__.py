@@ -282,7 +282,8 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
             content = self.opf.metadata_meta[name]
             element = doc.createElement("meta")
             element.setAttribute("name", name)
-            element.appendChild(doc.createTextNode(content))
+            element.setAttribute("content", content)
+            # OPF 3.0 element.appendChild(doc.createTextNode(content))
 
             metadata.appendChild(element)
 
