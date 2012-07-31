@@ -243,8 +243,11 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         # Create the OPF tag.
         opf = doc.createElement("package")
         doc.appendChild(opf)
-        opf.setAttribute("unique-identifier", self.opf.uid_id)
-        opf.setAttribute("version", "3.0")
+
+        if self.opf.uid_id:
+            opf.setAttribute("unique-identifier", self.opf.uid_id)
+
+        opf.setAttribute("version", self.opf.version)
         opf.setAttribute("xmlns", "http://www.idpf.org/2007/opf")
         opf.setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/")
 
@@ -278,7 +281,7 @@ class ManipulateOpfFileProcess(InputOpfFileProcess):
         for name in sorted(self.opf.metadata_meta.keys()):
             content = self.opf.metadata_meta[name]
             element = doc.createElement("meta")
-            element.setAttribute("property", name)
+            element.setAttribute("name", name)
             element.appendChild(doc.createTextNode(content))
 
             metadata.appendChild(element)

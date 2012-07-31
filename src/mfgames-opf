@@ -33,6 +33,7 @@ def do_opf_tool(arguments):
             'spine-set': mfgames_writing.opf.spine.SpineSetProcess(),
             'toc-get': mfgames_writing.opf.toc.TocGetProcess(),
             'toc-set': mfgames_writing.opf.toc.TocSetProcess(),
+            'uid-generate': mfgames_writing.opf.uid.UidGenerateProcess(),
             'uid-get': mfgames_writing.opf.uid.UidGetProcess(),
             'uid-set': mfgames_writing.opf.uid.UidSetProcess(),
         })
