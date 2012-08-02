@@ -241,20 +241,6 @@ class _DocBookScanner(xml.sax.ContentHandler):
         self.output_stream.write("</{0}>".format(name))
 
 
-class _XIncludeScanner(xml.sax.ContentHandler):
-    def __init__(self, args, input_filename):
-        xml.sax.ContentHandler.__init__(self)
-
-    def startElement(self, name, attrs):
-        # If we are an xinclude:include, then we recurse into the file
-        # referenced instead of just copying it plainly. This is
-        # effectively including all of the xinclude references.
-        if name == "xinclude:include":
-            # We are going to include a file.
-            href = attrs["href"]
-            print href
-
-
 class GatherFileProcess(mfgames_tools.process.InputFileProcess):
     """Primary process for gathering a file and all of its associated
     includes and resources."""
@@ -383,29 +369,3 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
 
     def get_help(self):
         return "Merges a DocBook file and all includes and gathers up external resources such as images."
-
-
-class XIncludeFileProcess(mfgames_tools.process.InputFileProcess):
-    def __init__(self):
-        super(XIncludeFileProcess, self).__init__()
-
-    def process(self, args):
-        # Handle the base class' processing which verifies the file
-        # already exists.
-        super(XIncludeFileProcess, self).process(args)
-
-        # The gather process is somewhat verbose so we'll use a logger.
-        log = logging.getLogger('xinclude')
-        
-        # Create the parser with the output file and the current path.
-        scanner = _XIncludeScanner(args, args.file)
-        parser = xml.sax.make_parser()
-        parser.setContentHandler(scanner)
-        parser.parse(args.file)
-
-    def setup_arguments(self, parser):
-        # Add in the argument from the base class.
-        super(XIncludeFileProcess, self).setup_arguments(parser)
-
-    def get_help(self):
-        return "Lists all the XInclude files."

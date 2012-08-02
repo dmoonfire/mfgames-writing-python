@@ -4,6 +4,7 @@ import logging
 import sys
 import mfgames_tools
 import mfgames_writing.docbook.count
+import mfgames_writing.docbook.depends
 import mfgames_writing.docbook.gather
 import mfgames_writing.docbook.info
 import mfgames_writing.docbook.text
@@ -24,10 +25,10 @@ def do_docbook_tool(arguments):
                 mfgames_writing.docbook.count.CountProcess(),
             'creole':
                 mfgames_writing.docbook.text.ConvertToCreoleFilesProcess(),
+            'depends':
+                mfgames_writing.docbook.depends.DependsFileProcess(),
             'gather':
                 mfgames_writing.docbook.gather.GatherFileProcess(),
-            'xinclude':
-                mfgames_writing.docbook.gather.XIncludeFileProcess(),
             'subjectsets':
                 mfgames_writing.docbook.info.ExtractSubjectsetsProcess(),
             'query':
