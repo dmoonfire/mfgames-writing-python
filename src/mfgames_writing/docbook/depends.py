@@ -21,10 +21,14 @@ class _DependsScanner(xml.sax.ContentHandler):
         self.rel_filename = filename
 
         if args.directory_root:
-            root_path = os.path.abspath(filename)
-            root_directory = os.path.dirname(root_path)
-            abs_path = os.path.join(root_directory, filename)
-            self.rel_filename = os.path.relpath(abs_path, args.directory_root)
+             abs_filename = os.path.abspath(filename)
+             abs_root = os.path.abspath(args.directory_root)
+             self.rel_filename = os.path.relpath(abs_filename, abs_root)
+
+        if args.directory_prefix:
+            self.rel_filename = os.path.join(
+                args.directory_prefix,
+                self.rel_filename)
 
     def startElement(self, name, attrs):
         if name == "xinclude:include" and not self.args.no_xinclude:
