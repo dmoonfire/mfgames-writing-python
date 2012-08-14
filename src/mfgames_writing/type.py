@@ -15,23 +15,23 @@ EM_DASH = u'\u2014'
 ELLIPSIS = u'\u2026'
 
 QUOTE_CHARACTERS = [
-    "'", '"', '`',
+    u"'", u'"', u'`',
     OPEN_DOUBLE_QUOTE,
     CLOSE_DOUBLE_QUOTE,
     OPEN_SINGLE_QUOTE,
     CLOSE_SINGLE_QUOTE,
     ]
 DOUBLE_QUOTE_CHARACTERS = [
-    '"', 
+    u'"', 
     OPEN_DOUBLE_QUOTE,
     CLOSE_DOUBLE_QUOTE]
 SINGLE_QUOTE_CHARACTERS = [
-    "'", 
+    u"'", 
     OPEN_SINGLE_QUOTE,
     CLOSE_SINGLE_QUOTE]
-TICK_QUOTE_CHARACTERS = ["`"]
+TICK_QUOTE_CHARACTERS = [u"`"]
 
-PUNCT_CHARACTERS = [".", ",", "!", "?", ":", ";"]
+PUNCT_CHARACTERS = [u".", u",", u"!", u"?", u":", u";"]
 
 OUTSIDE = 0
 IN_DOUBLE = 1
@@ -97,6 +97,10 @@ class TypographicalConvertor(object):
         self.open_tick_quote = "`"
 
     def convert(self, input_string):
+        # If the input string isn't Unicode, make it so.
+        if type(input_string) != unicode:
+            input_string = unicode(input_string, 'UTF-8')
+
         # Pull out the tokens from the input string.
         tokens = self.tokenize(input_string)
 
@@ -278,7 +282,7 @@ class TypographicalConvertor(object):
             return self.ellipsis, len(match.group(1))
 
         # Pull off a block of normal characters.
-        match = re.match(r'^([^\s.,;\'"`<>]+)', input_string)
+        match = re.match(u'^([^\s.,\?;\'"`<>\u201C\u201D\u2018\u2019]+)', input_string)
 
         if match:
             return match.group(1), len(match.group(1))

@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 #
 # Imports
@@ -66,140 +67,150 @@ class TypeTests(unittest.TestCase):
         tqc = mfgames_writing.type.DocBookTypographicalConvertor()
         self.run_test(tqc, input_string, expected_string)
 
-    # def test_unquoted(self):
-    #     self.run_default(
-    #         'One two three.',
-    #         'One two three.')
+    def test_unquoted(self):
+        self.run_default(
+            'One two three.',
+            'One two three.')
 
-    # def test_unquoted_spaces(self):
-    #     self.run_default(
-    #         "One\ttwo    three.",
-    #         "One\ttwo    three.")
+    def test_unquoted_spaces(self):
+        self.run_default(
+            "One\ttwo    three.",
+            "One\ttwo    three.")
 
-    # def test_double(self):
-    #     self.run_default(
-    #         'One "two" three.',
-    #         'One _OD_two_CD_ three.')
+    def test_double(self):
+        self.run_default(
+            'One "two" three.',
+            'One _OD_two_CD_ three.')
 
-    # def test_start_double(self):
-    #     self.run_default(
-    #         '"One two" three.',
-    #         '_OD_One two_CD_ three.')
+    def test_start_double(self):
+        self.run_default(
+            '"One two" three.',
+            '_OD_One two_CD_ three.')
 
-    # def test_end_double(self):
-    #     self.run_default(
-    #         'One "two three."',
-    #         'One _OD_two three._CD_')
+    def test_end_double(self):
+        self.run_default(
+            'One "two three."',
+            'One _OD_two three._CD_')
 
-    # def test_end_double(self):
-    #     self.run_default(
-    #         'One "two three.',
-    #         'One _OED_two three._CED_')
+    def test_end_double(self):
+        self.run_default(
+            'One "two three.',
+            'One _OED_two three._CED_')
 
-    # def test_single(self):
-    #     self.run_default(
-    #         "One 'two' three.",
-    #         "One _OS_two_CS_ three.")
+    def test_single(self):
+        self.run_default(
+            "One 'two' three.",
+            "One _OS_two_CS_ three.")
 
-    # def test_nested_1(self):
-    #     self.run_default(
-    #         "One \"'two'\" three.",
-    #         "One _OD__OS_two_CS__CD_ three.")
+    def test_nested_1(self):
+        self.run_default(
+            "One \"'two'\" three.",
+            "One _OD__OS_two_CS__CD_ three.")
 
-    # def test_nested_2(self):
-    #     self.run_default(
-    #         "One \"'\"two\"'\" three.",
-    #         "One _OD__OS__OD_two_CD__CS__CD_ three.")
+    def test_nested_2(self):
+        self.run_default(
+            "One \"'\"two\"'\" three.",
+            "One _OD__OS__OD_two_CD__CS__CD_ three.")
 
-    # def test_start_single(self):
-    #     self.run_default(
-    #         "'One two' three.",
-    #         "_OS_One two_CS_ three.")
+    def test_start_single(self):
+        self.run_default(
+            "'One two' three.",
+            "_OS_One two_CS_ three.")
 
-    # def test_end_single(self):
-    #     self.run_default(
-    #         "One 'two three.'",
-    #         "One _OS_two three._CS_")
+    def test_end_single(self):
+        self.run_default(
+            "One 'two three.'",
+            "One _OS_two three._CS_")
 
-    # def test_xml_double(self):
-    #     self.run_xml(
-    #         '<b>One "two" three.</b>',
-    #         '<b>One _OD_two_CD_ three.</b>')
+    def test_xml_double(self):
+        self.run_xml(
+            '<b>One "two" three.</b>',
+            '<b>One _OD_two_CD_ three.</b>')
 
-    # def test_double(self):
-    #     self.run_xml(
-    #         '<b>One <e>"two"</e> three.</b>',
-    #         '<b>One <e>_OD_two_CD_</e> three.</b>')
+    def test_double(self):
+        self.run_xml(
+            '<b>One <e>"two"</e> three.</b>',
+            '<b>One <e>_OD_two_CD_</e> three.</b>')
 
-    # def test_tick(self):
-    #     self.run_default(
-    #         'One `two` three.',
-    #         'One _OT_two_CT_ three.')
+    def test_tick(self):
+        self.run_default(
+            'One `two` three.',
+            'One _OT_two_CT_ three.')
 
-    # def test_start_tick(self):
-    #     self.run_default(
-    #         '`One two` three.',
-    #         '_OT_One two_CT_ three.')
+    def test_start_tick(self):
+        self.run_default(
+            '`One two` three.',
+            '_OT_One two_CT_ three.')
 
-    # def test_end_tick(self):
-    #     self.run_default(
-    #         'One `two three.`',
-    #         'One _OT_two three._CT_')
+    def test_end_tick(self):
+        self.run_default(
+            'One `two three.`',
+            'One _OT_two three._CT_')
 
-    # def test_contraction(self):
-    #     self.run_default(
-    #         "One it's two.",
-    #         "One it_A_s two.")
+    def test_contraction(self):
+        self.run_default(
+            "One it's two.",
+            "One it_A_s two.")
 
-    # def test_ending_contraction(self):
-    #     self.run_default(
-    #         "One boss' two.",
-    #         "One boss_A_ two.")
+    def test_ending_contraction(self):
+        self.run_default(
+            "One boss' two.",
+            "One boss_A_ two.")
 
-    # def test_dash(self):
-    #     self.run_default(
-    #         "One - two.",
-    #         "One - two.")
+    def test_dash(self):
+        self.run_default(
+            "One - two.",
+            "One - two.")
 
-    # def test_endash(self):
-    #     self.run_default(
-    #         "One -- two.",
-    #         "One _EN_ two.")
+    def test_endash(self):
+        self.run_default(
+            "One -- two.",
+            "One _EN_ two.")
 
-    # def test_emdash(self):
-    #     self.run_default(
-    #         "One --- two.",
-    #         "One _EM_ two.")
+    def test_emdash(self):
+        self.run_default(
+            "One --- two.",
+            "One _EM_ two.")
 
-    # def test_ellipsis(self):
-    #     self.run_default(
-    #         "One ... two.",
-    #         "One _E_ two.")
+    def test_ellipsis(self):
+        self.run_default(
+            "One ... two.",
+            "One _E_ two.")
 
-    # def test_ellipsis_period(self):
-    #     self.run_default(
-    #         "One .... two.",
-    #         "One _E_. two.")
+    def test_ellipsis_period(self):
+        self.run_default(
+            "One .... two.",
+            "One _E_. two.")
 
-    # def test_docbook_para(self):
-    #     self.run_docbook(
-    #         '<para>One two three.</para>',
-    #         '<para>One two three.</para>')
+    def test_docbook_para(self):
+        self.run_docbook(
+            '<para>One two three.</para>',
+            '<para>One two three.</para>')
 
-    # def test_docbook_quotes(self):
-    #     self.run_docbook(
-    #         '<para>One "two" three.</para>',
-    #         '<para>One _OD_two_CD_ three.</para>')
+    def test_docbook_quotes(self):
+        self.run_docbook(
+            '<para>One "two" three.</para>',
+            '<para>One _OD_two_CD_ three.</para>')
 
-    # def test_docbook_ended_paragraphs(self):
-    #     self.run_docbook(
-    #         '<para>"I said</para><para>"You like cheese."</para>',
-    #         "<para>_OED_I said_CED_</para><para>_OD_You like cheese._CD_</para>")
+    def test_docbook_ended_paragraphs(self):
+        self.run_docbook(
+            '<para>"I said</para><para>"You like cheese."</para>',
+            "<para>_OED_I said_CED_</para><para>_OD_You like cheese._CD_</para>")
 
     def test_docbook_tis(self):
         self.run_docbook(
             '<para>"\'eh, boss?"</para>',
             '<para>_OD_\'eh, boss?_CD_</para>')
+
+    def test_unicode_question_quotes(self):
+        self.run_default(
+            u'“Bob?”',
+            '_OD_Bob?_CD_')
+
+    def test_unicode_quotes(self):
+        self.run_default(
+            u'“Bob”',
+            '_OD_Bob_CD_')
 
 #
 # Entry
