@@ -106,6 +106,9 @@ class InputNcxFileProcess(mfgames_tools.process.InputFileProcess):
         self.ncx = Ncx()
         scanner = _NcxScanner(self.ncx)
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(scanner)
         parser.parse(args.file)
 

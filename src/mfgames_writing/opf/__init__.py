@@ -136,6 +136,9 @@ class InputOpfFileProcess(mfgames_tools.process.InputFileProcess):
         self.opf = Opf()
         scanner = _OpfScanner(self.opf)
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(scanner)
         parser.parse(open(args.file))
 

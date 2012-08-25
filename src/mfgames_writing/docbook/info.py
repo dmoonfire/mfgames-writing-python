@@ -78,8 +78,13 @@ class ExtractSubjectsetsProcess(mfgames_tools.process.InputFilesProcess):
         # Go through the file and build up the structural elements of
         # the document. This is used to determine chunking and file
         # generation.
-        self.structure = mfgames_writing.docbook.scan._StructureScanner(self, '')
+        self.structure = mfgames_writing.docbook.scan._StructureScanner(
+            self,
+            '')
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(self.structure)
         parser.parse(open(input_filename))
 

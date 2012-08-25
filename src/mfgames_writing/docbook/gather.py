@@ -85,6 +85,9 @@ class _DocBookScanner(xml.sax.ContentHandler):
                 self.output_stream, 
                 True)
             parser = xml.sax.make_parser()
+            parser.setFeature(
+                "http://xml.org/sax/features/external-general-entities",
+                False)
             parser.setContentHandler(scanner)
             parser.parse(include_filename)
 
@@ -307,6 +310,9 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
         # Create the parser with the output file and the current path.
         scanner = _DocBookScanner(args, args.file, args.output, output, False)
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(scanner)
         parser.parse(args.file)
         output.close()

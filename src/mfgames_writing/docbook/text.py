@@ -59,6 +59,9 @@ class ConvertToTextFilesProcess(
         # Go through the file and create the actual output based on
         # the structure parsed above.
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(self)
         parser.parse(open(input_filename))
 

@@ -275,6 +275,9 @@ class ScanDocbookFilesProcess(mfgames_tools.process.ConvertFilesProcess):
         # generation.
         self.structure = _StructureScanner(self, output_filename)
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(self.structure)
         parser.parse(open(input_filename))
 

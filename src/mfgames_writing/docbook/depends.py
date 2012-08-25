@@ -75,6 +75,9 @@ class DependsFileProcess(mfgames_tools.process.InputFileProcess):
         # Create the parser with the output file and the current path.
         scanner = _DependsScanner(args, args.file)
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(scanner)
         parser.parse(args.file)
 

@@ -263,6 +263,9 @@ class CountProcess(mfgames_tools.process.InputFilesProcess):
         # break up the counts and produce a dictionary of the various
         # counts.
         parser = xml.sax.make_parser()
+        parser.setFeature(
+            "http://xml.org/sax/features/external-general-entities",
+            False)
         parser.setContentHandler(scanner)
         parser.parse(open(filename))
 
