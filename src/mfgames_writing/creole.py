@@ -504,22 +504,22 @@ class DocbookAttributionParser(object):
             # are identified as a special character followed by text,
             # but not ending with a paragraph.
             inner = search.group(2)
-            inner_search = re.search(r'\s*&#8212;\s*([^<]+)</simpara>', inner)
+            inner_search = re.search(r'\s*(&#8212;|--)\s*([^<]+)</simpara>', inner)
             
             # If we found an attribute, use it.
             if inner_search != None:
                 # Remove what we found from the inner contents.
                 inner = inner.replace(inner_search.group(0), '')
+                inner += "</simpara>"
 
                 # Put the attribution before the paragraphs in the
                 # blockquote. These are added with the
                 # 'buf.append(inner)' line below.
                 buf.append('<attribution>')
-                buf.append(inner_search.group(1))
+                buf.append(inner_search.group(2))
                 buf.append('</attribution>')
 
             buf.append(inner)
-            buf.append('</simpara>')
 
             # Finish the blockquote and put it on the buffer.
             buf.append('</blockquote>')
