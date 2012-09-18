@@ -32,6 +32,12 @@ class _DocBookScanner(xml.sax.ContentHandler):
         self.output_directory = os.path.dirname(
             os.path.abspath(output_filename))
 
+        # Get the relative path for the current file.
+        self.relative_dirname = os.path.relpath(
+            self.input_directory, 
+            self.args.directory_root)
+        self.log.debug("Relative path: " + self.relative_dirname)
+
         # Some internal flags which are used to determine if we need
         # to strip out elements that should not be there. In specific,
         # DocBook says the version flag should not be on anything
@@ -119,10 +125,13 @@ class _DocBookScanner(xml.sax.ContentHandler):
         # we can't and also skip the ones after).
         if name == "mediaobject":
             # If we are skipping media objects entirely, we need to check that.
+            #self.log.info("Found media object")
+
             if self.args.strip_media == 'yes' or (
                 self.args.strip_media == 'included-only' and
                 self.is_included):
                 # We are skipping this media object.
+                self.log.debug("  Skipping " + self.args.strip_media)
                 self.skip = 1
                 return
 
@@ -154,24 +163,53 @@ class _DocBookScanner(xml.sax.ContentHandler):
         image_path = None
 
         if name == "imagedata" and self.args.copy_media:
-            # The filename is located in fileref. We want to make it
-            # an absolute path if it isn't already.
+            # The filename is located in fileref. See if we are not
+            # touching those files.
             fileref = attrs["fileref"]
-            fileref = os.path.abspath(
-                os.path.join(self.input_directory, fileref))
             baseref = os.path.basename(fileref)
 
-            # Figure out where we are going to put the output file. We
-            # include the file hash to the file to handle duplicate
-            # names that are actually different files.
-            file_hash = mfgames_writing.get_file_hash(fileref) + "_"
+            self.log.debug("Found image data: " + fileref)
 
-            if baseref in self.args.exclude_media_hash:
-                file_hash = ""
+            if baseref in self.args.exclude_media:
+                # We are ignoring this file entirely
+                self.log.debug("  Skipping because it is in --exclude-media")
+                return
+            
+            # We aren't ignoring it, so we need to find the absolute
+            # path to it.
+            absfileref = None
+
+            for media_source in self.args.media_search:
+                testfileref = os.path.abspath(
+                    os.path.join(media_source, self.relative_dirname, fileref))
+
+                if os.path.isfile(testfileref):
+                    absfileref = testfileref
+                    break
+
+            if not absfileref:
+                self.log.error("  Cannot find file: " + fileref)
+                self.log.error("  Search path: " +
+                               ", ".join(self.args.media_search))
+
+                raise Exception(
+                    "Cannot find input image file: "
+                    + os.linesep
+                    + "  " + fileref
+                    + os.linesep
+                    + "Relative path: " + os.linesep
+                    + "  " + self.relative_dirname
+                    + os.linesep
+                    + "Search path: " + os.linesep + "  "
+                    + (os.linesep + "  ").join(self.args.media_search))
+
+            # Include the file hash to the file to handle duplicate
+            # names that are actually different files.
+            file_hash = mfgames_writing.get_file_hash(absfileref) + "_"
             
             outputref = os.path.abspath(
                 os.path.join(
-                    self.args.media_directory,
+                    self.args.media_destination,
                     file_hash + baseref))
 
             # Make sure the directory exists.
@@ -182,13 +220,13 @@ class _DocBookScanner(xml.sax.ContentHandler):
                 os.makedirs(output_directory)
 
             # Copy the file into the proper location.
-            self.log.debug("Copying image from: " + fileref)
-            shutil.copy(fileref, outputref)
-            self.log.info("Copied image file: " + baseref)
+            self.log.debug("Copying image from: " + absfileref)
+            shutil.copy(absfileref, outputref)
+            self.log.info("Copied image file: " + outputref)
 
             # Set up the image path so we can replace it.
             image_path = os.path.relpath(outputref, self.output_directory)
-
+            
         # Write out a new element with modifications.
         self.output_stream.write("<");
         self.output_stream.write(name);
@@ -288,11 +326,21 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
         log.info("Using output file: " + output_file)
 
         # Normalize the media directory, in case we use it.
-        if not args.media_directory:
-            args.media_directory = args.directory
+        if not args.media_destination:
+            args.media_destination = args.directory
         else:
-            args.media_directory = os.path.join(
-                args.directory, args.media_directory)
+            args.media_destination = os.path.join(
+                args.directory, args.media_destination)
+
+        # If the media search was not given, then use the input file's
+        # directory. This is to ensure that we don't have to worry
+        # about None values while processing search paths.
+        if not args.media_search:
+            args.media_search = [os.path.dirname(os.path.abspath(args.file))]
+
+        # If we have a relative root of the directory, we need to use it.
+        if not args.directory_root:
+            args.directory_root = os.path.dirname(os.path.abspath(args.file))
 
         # We have everything we need to perform the action. We create
         # an XML reader that will parse through this (and any
@@ -344,7 +392,8 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
             action='store_true',
             help="If set, then mediaobjects (e.g., text, image) are reduced down to one.")
         parser.add_argument(
-            '--filter-media', '-m',
+            '--filter-media',
+            metavar='CONDITION',
             type=str,
             help="If set, then the condition element on a imageobject must match for it to be included.")
         parser.add_argument(
@@ -354,24 +403,40 @@ class GatherFileProcess(mfgames_tools.process.InputFileProcess):
             choices=['no', 'yes', 'included-only'],
             help="If 'no', then no stripping. If 'yes', all media will be stripped. If 'included-only', then only media in included files will be stripped.")
         parser.add_argument(
-            '--copy-media', '-c',
-            default=False,
-            action='store_true',
-            help="If included, then image files will be copied in the output directory.")
-        parser.add_argument(
-            '--exclude-media-hash', '-x',
-            default=[],
-            nargs="+")
-        parser.add_argument(
-            '--media-directory',
-            type=str,
-            help="If set, then media files will be copied here instead of the output. This can be a relative path to the output directory.")
-        parser.add_argument(
             '--book-chapters',
             type=str,
             default='auto',
             choices=['auto', 'article', 'chapter'],
             help="While gathering articles or chapters under a book, convert them to a known type. 'auto' means use the @role of the book.")
+        parser.add_argument(
+            '--directory-root',
+            metavar='DIR',
+            type=str,
+            help="If set, then path calculates for media files will be based ont the directory root. If not set, then the directory of the input file will be used.")
+
+        # Copy media and related options.
+        parser.add_argument(
+            '--copy-media', '-c',
+            default=False,
+            action='store_true',
+            help="If included, then image files will be copied in the output directory.")
+        parser.add_argument(
+            '--exclude-media', '-x',
+            metavar='FILE',
+            default=[],
+            nargs="+",
+            help="Excludes the given files from being copied.")
+        parser.add_argument(
+            '--media-search', '-M',
+            metavar='DIR',
+            type=str,
+            nargs="+",
+            help="Lists the directories that will be searched for media files. If not set, then the directory of the input file will be used.")
+        parser.add_argument(
+            '--media-destination',
+            metavar='DIR',
+            type=str,
+            help="If set, then media files will be copied here instead of the output. This can be a relative path to the output directory.")
 
     def get_help(self):
         return "Merges a DocBook file and all includes and gathers up external resources such as images."
