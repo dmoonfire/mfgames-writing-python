@@ -332,9 +332,9 @@ class DocBookTypographicalConvertor(XmlTypographicalConvertor):
         self.open_single_quote = "<quote role='single'>"
         self.open_tick_quote = "<foreignphrase>"
         self.apostrophe = "'"
-        self.en_dash = CLOSE_SINGLE_QUOTE
-        self.em_dash = EM_DASH
-        self.ellipsis = ELLIPSIS
+        self.en_dash = "&#x2013;"
+        self.em_dash = "&#x2014;"
+        self.ellipsis = "&#x2026;"
 
     def process_token(self, input_string, index):
         # Get the base implementation of the token

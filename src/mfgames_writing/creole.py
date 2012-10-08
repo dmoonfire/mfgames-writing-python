@@ -507,7 +507,7 @@ class DocbookAttributionParser(object):
             # versions.
             inner = search.group(2)
             inner_search = re.search(
-                u'\s*(&#8212;|-{2,3}|\u2013|\u2014)\s*([^<]+)</simpara>',
+                u'\s*(&#8212;|&#x2013;|&#x2014;|-{2,3}|\u2013|\u2014)\s*([^<]+)</simpara>',
                 inner)
             
             # If we found an attribute, use it.
