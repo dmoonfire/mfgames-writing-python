@@ -502,9 +502,13 @@ class DocbookAttributionParser(object):
 
             # Pull out the paragraphs and look for attributions. These
             # are identified as a special character followed by text,
-            # but not ending with a paragraph.
+            # but not ending with a paragraph. Since we may have
+            # converted the quotes, we also handle the Unicode
+            # versions.
             inner = search.group(2)
-            inner_search = re.search(r'\s*(&#8212;|--)\s*([^<]+)</simpara>', inner)
+            inner_search = re.search(
+                u'\s*(&#8212;|[-\u2013\u2014]+)\s*([^<]+)</simpara>',
+                inner)
             
             # If we found an attribute, use it.
             if inner_search != None:

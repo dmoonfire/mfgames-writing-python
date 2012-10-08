@@ -269,7 +269,6 @@ class TypographicalConvertor(object):
 
         if match:
             if len(match.group(1)) == 2:
-                print "bbb: " + self.en_dash
                 return self.en_dash, 2
             elif len(match.group(1)) == 3:
                 return self.em_dash, 3
