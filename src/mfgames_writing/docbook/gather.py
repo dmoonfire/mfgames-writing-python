@@ -170,62 +170,58 @@ class _DocBookScanner(xml.sax.ContentHandler):
 
             self.log.debug("Found image data: " + fileref)
 
-            if baseref in self.args.exclude_media:
-                # We are ignoring this file entirely
-                self.log.debug("  Skipping because it is in --exclude-media")
-                return
-            
-            # We aren't ignoring it, so we need to find the absolute
-            # path to it.
-            absfileref = None
+            if baseref not in self.args.exclude_media:
+		        # We aren't ignoring it, so we need to find the absolute
+		        # path to it.
+		        absfileref = None
 
-            for media_source in self.args.media_search:
-                testfileref = os.path.abspath(
-                    os.path.join(media_source, self.relative_dirname, fileref))
+		        for media_source in self.args.media_search:
+		            testfileref = os.path.abspath(
+		                os.path.join(media_source, self.relative_dirname, fileref))
 
-                if os.path.isfile(testfileref):
-                    absfileref = testfileref
-                    break
+		            if os.path.isfile(testfileref):
+		                absfileref = testfileref
+		                break
 
-            if not absfileref:
-                self.log.error("  Cannot find file: " + fileref)
-                self.log.error("  Search path: " +
-                               ", ".join(self.args.media_search))
+		        if not absfileref:
+		            self.log.error("  Cannot find file: " + fileref)
+		            self.log.error("  Search path: " +
+		                           ", ".join(self.args.media_search))
 
-                raise Exception(
-                    "Cannot find input image file: "
-                    + os.linesep
-                    + "  " + fileref
-                    + os.linesep
-                    + "Relative path: " + os.linesep
-                    + "  " + self.relative_dirname
-                    + os.linesep
-                    + "Search path: " + os.linesep + "  "
-                    + (os.linesep + "  ").join(self.args.media_search))
+		            raise Exception(
+		                "Cannot find input image file: "
+		                + os.linesep
+		                + "  " + fileref
+		                + os.linesep
+		                + "Relative path: " + os.linesep
+		                + "  " + self.relative_dirname
+		                + os.linesep
+		                + "Search path: " + os.linesep + "  "
+		                + (os.linesep + "  ").join(self.args.media_search))
 
-            # Include the file hash to the file to handle duplicate
-            # names that are actually different files.
-            file_hash = mfgames_writing.get_file_hash(absfileref) + "_"
-            
-            outputref = os.path.abspath(
-                os.path.join(
-                    self.args.media_destination,
-                    file_hash + baseref))
+		        # Include the file hash to the file to handle duplicate
+		        # names that are actually different files.
+		        file_hash = mfgames_writing.get_file_hash(absfileref) + "_"
+		        
+		        outputref = os.path.abspath(
+		            os.path.join(
+		                self.args.media_destination,
+		                file_hash + baseref))
 
-            # Make sure the directory exists.
-            output_directory = os.path.dirname(outputref)
+		        # Make sure the directory exists.
+		        output_directory = os.path.dirname(outputref)
 
-            if not os.path.isdir(output_directory):
-                self.log.info("Creating directory: " + output_directory)
-                os.makedirs(output_directory)
+		        if not os.path.isdir(output_directory):
+		            self.log.info("Creating directory: " + output_directory)
+		            os.makedirs(output_directory)
 
-            # Copy the file into the proper location.
-            self.log.debug("Copying image from: " + absfileref)
-            shutil.copy(absfileref, outputref)
-            self.log.info("Copied image file: " + outputref)
+		        # Copy the file into the proper location.
+		        self.log.debug("Copying image from: " + absfileref)
+		        shutil.copy(absfileref, outputref)
+		        self.log.info("Copied image file: " + outputref)
 
-            # Set up the image path so we can replace it.
-            image_path = os.path.relpath(outputref, self.output_directory)
+		        # Set up the image path so we can replace it.
+		        image_path = os.path.relpath(outputref, self.output_directory)
             
         # Write out a new element with modifications.
         self.output_stream.write("<");
