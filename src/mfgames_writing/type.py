@@ -252,8 +252,6 @@ class TypographicalConvertor(object):
     def pop_token(self, input_string):
         """Returns the next token off the input string."""
 
-        print "AAA: " + input_string
-
         # Grab the character and see if we have a single special character.
         c = input_string[0]
 
