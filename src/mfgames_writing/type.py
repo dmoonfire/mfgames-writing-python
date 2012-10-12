@@ -252,6 +252,8 @@ class TypographicalConvertor(object):
     def pop_token(self, input_string):
         """Returns the next token off the input string."""
 
+        print "AAA: " + input_string
+
         # Grab the character and see if we have a single special character.
         c = input_string[0]
 
@@ -282,7 +284,7 @@ class TypographicalConvertor(object):
             return self.ellipsis, len(match.group(1))
 
         # Pull off a block of normal characters.
-        match = re.match(u'^([^\s.,\?;\'"`<>\u201C\u201D\u2018\u2019]+)', input_string)
+        match = re.match(u'^([^\s.,\?;\'"`<>\u201C\u201D\u2018\u2019-]+)', input_string)
 
         if match:
             return match.group(1), len(match.group(1))

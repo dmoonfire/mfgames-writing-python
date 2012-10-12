@@ -177,6 +177,21 @@ class TypeTests(unittest.TestCase):
             "One ... two.",
             "One _E_ two.")
 
+    def test_emdash_beginning(self):
+        self.run_default(
+            '"--- two."',
+            '_OD__EM_ two._CD_')
+
+    def test_emdash_end(self):
+        self.run_default(
+            '"One ---"',
+            '_OD_One _EM__CD_')
+
+    def test_emdash_begin_end(self):
+        self.run_default(
+            '"---One---"',
+            '_OD__EM_One_EM__CD_')
+
     def test_ellipsis_period(self):
         self.run_default(
             "One .... two.",
