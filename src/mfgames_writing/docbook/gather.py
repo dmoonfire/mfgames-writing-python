@@ -169,6 +169,7 @@ class _DocBookScanner(xml.sax.ContentHandler):
             baseref = os.path.basename(fileref)
 
             self.log.debug("Found image data: " + fileref)
+            self.log.debug("Found base filename: " + baseref)
 
             if baseref not in self.args.exclude_media:
 		        # We aren't ignoring it, so we need to find the absolute
