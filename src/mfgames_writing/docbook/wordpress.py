@@ -10,6 +10,7 @@ import mfgames_writing.docbook.info
 import os
 import re
 import sys
+import time
 import xml
 import xmlrpclib
 
@@ -320,27 +321,56 @@ class UploadFilesProcess(mfgames_tools.process.InputFilesProcess):
     def cache_pages(self):
         """Downloads a list of pages from the server so it can be cached."""
 
-        self.log.info("Downloading pages from the server")
+        # First start by retrieving the list of pages from the
+        # server. We do that because with sites that have a lot of
+        # pages, we can overload the server too easily.
+        self.log.info("Downloading page list from server")
 
-        wp_filter = {
-            'post_type': 'page',
-            'number': 99999999,
-            }
-
-        posts = self.proxy.wp.getPosts(
+        pages = self.proxy.wp.getPageList(
             self.args.blog,
             self.args.username,
-            self.args.password,
-            wp_filter)
+            self.args.password)
 
-        # Go through each of the posts and cache each one using the
-        # slug (with aprents) as the key.
+        self.log.info("Processing {0:n} pages".format(len(pages)))
+
+        # Go through each post and retrieve it from the server.
         self.pages = {}
 
-        for post in posts:
-            rel_link = post['link'].replace(self.blog_url, "")[1:]
-            self.pages[rel_link] = post
-            #print rel_link
+        next_report = int(time.time()) + 5
+        processed = 0
+
+        for page in pages:
+            # Pull out information about the page.
+            page_id = page['page_id']
+            page_title = page['page_title']
+
+            # Get the full page data
+            data = self.proxy.wp.getPage(
+                self.args.blog,
+                page_id,
+                self.args.username,
+                self.args.password);
+            data['post_id'] = page_id
+
+            # Store the information about the page using the relative
+            # link (without the blog_url).
+            rel_link = data['link'].replace(self.blog_url, "")[1:]
+            rel_link = re.sub(r'/$', "", rel_link)
+            self.pages[rel_link] = data
+
+            # DEBUG self.log.debug("Link {0}".format(rel_link))
+
+            # Check to see if we need to report our status.
+            processed += 1
+
+            if (int(time.time()) > next_report):
+                l = format(len(format(len(pages))))
+                self.log.debug(
+                    ("  Processed {2:5.1f}%: {0:" + l + "} of {1}").format(
+                        processed,
+                        len(pages),
+                        100.0 * processed / len(pages)))
+                next_report = time.time() + 60
 
     def setup_arguments(self, parser):
         # Add in the argument from the base class.
