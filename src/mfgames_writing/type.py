@@ -331,7 +331,7 @@ class DocBookTypographicalConvertor(XmlTypographicalConvertor):
         self.open_ended_tick_quote = "<foreignphrase role='open'>"
         self.open_single_quote = "<quote role='single'>"
         self.open_tick_quote = "<foreignphrase>"
-        self.apostrophe = "'"
+        self.apostrophe = CLOSE_SINGLE_QUOTE
         self.en_dash = "&#x2013;"
         self.em_dash = "&#x2014;"
         self.ellipsis = "&#x2026;"
