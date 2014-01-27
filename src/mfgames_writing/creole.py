@@ -248,7 +248,7 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         header_attributes = " ".join(namespaces)
 
         if args.id != None:
-            header_attributes += ' id="' + args.id + '"'
+            header_attributes += ' xml:id="' + args.id + '"'
 
         header_attributes += ' version="5.0"'
 
