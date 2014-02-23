@@ -248,7 +248,7 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         header_attributes = " ".join(namespaces)
 
         if args.id != None:
-            header_attributes += ' id="' + args.id + '"'
+            header_attributes += ' xml:id="' + args.id + '"'
 
         header_attributes += ' version="5.0"'
 
@@ -381,7 +381,7 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
     
         # Loop through the resulting section pairs and create the elements.
         for index in range(1, len(sections)):
-            results.append("<section id='s" + format(section_index) + "'>")
+            results.append("<section xml:id='s" + format(section_index) + "'>")
             results.append(sections[index])
 
             section_index += 1
@@ -611,9 +611,9 @@ class DocbookMetadataParser(object):
         # Look for subjectsets that need to be combined since they
         # have the same schema but potentially different tags.
         contents = re.sub(
-            r'<subjectset schema="([^"]+)">(.*?)</subjectset>(.*?)'
-            + r'<subjectset schema="\1">(.*?)</subjectset>',
-            '<subjectset schema="\\1">\\2\\4</subjectset>\\3',
+            r'<subjectset scheme="([^"]+)">(.*?)</subjectset>(.*?)'
+            + r'<subjectset scheme="\1">(.*?)</subjectset>',
+            '<subjectset scheme="\\1">\\2\\4</subjectset>\\3',
             contents)
 
         # Return the resulting contents
@@ -697,7 +697,7 @@ class DocbookMetadataParser(object):
             .join(split_terms)
         terms = terms.replace('\tunicode\t', ';')
         subject = "".join([
-            '<subjectset schema="',
+            '<subjectset scheme="',
             key,
             '"><subject><subjectterm>',
             terms,
