@@ -101,7 +101,7 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         # "break" as the key.
         contents = re.sub(
             r'<(sim)?para>-</(sim?)para>',
-            r'<bridgehead otherrenderas="break"/>',
+            r'<bridgehead renderas="other" otherrenderas="break"/>',
             contents)
 
         # Start by initializing the namespaces.
