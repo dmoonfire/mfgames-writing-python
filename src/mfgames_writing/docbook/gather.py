@@ -125,7 +125,7 @@ class _DocBookScanner(xml.sax.ContentHandler):
         # we can't and also skip the ones after).
         if name == "mediaobject":
             # If we are skipping media objects entirely, we need to check that.
-            #self.log.info("Found media object")
+            self.log.info("Found media object")
 
             if self.args.strip_media == 'yes' or (
                 self.args.strip_media == 'included-only' and
@@ -142,6 +142,8 @@ class _DocBookScanner(xml.sax.ContentHandler):
             # Skip it if we found a media object. We need to skip all
             # of the elements underneath this, so we set the flag and
             # skip until we get to skip <= 0.
+            self.log.debug("Processing media object: " + name)
+
             if self.found_mediaobject and self.args.reduce_media:
                 self.skip = 1
                 return
@@ -172,58 +174,67 @@ class _DocBookScanner(xml.sax.ContentHandler):
             self.log.debug("Found base filename: " + baseref)
 
             if baseref not in self.args.exclude_media:
-		        # We aren't ignoring it, so we need to find the absolute
-		        # path to it.
-		        absfileref = None
-
-		        for media_source in self.args.media_search:
-		            testfileref = os.path.abspath(
-		                os.path.join(media_source, self.relative_dirname, fileref))
-
-		            if os.path.isfile(testfileref):
-		                absfileref = testfileref
-		                break
-
-		        if not absfileref:
-		            self.log.error("  Cannot find file: " + fileref)
-		            self.log.error("  Search path: " +
-		                           ", ".join(self.args.media_search))
-
-		            raise Exception(
-		                "Cannot find input image file: "
-		                + os.linesep
-		                + "  " + fileref
-		                + os.linesep
-		                + "Relative path: " + os.linesep
-		                + "  " + self.relative_dirname
-		                + os.linesep
-		                + "Search path: " + os.linesep + "  "
-		                + (os.linesep + "  ").join(self.args.media_search))
-
-		        # Include the file hash to the file to handle duplicate
-		        # names that are actually different files.
-		        file_hash = mfgames_writing.get_file_hash(absfileref) + "_"
-		        
-		        outputref = os.path.abspath(
-		            os.path.join(
-		                self.args.media_destination,
-		                file_hash + baseref))
-
-		        # Make sure the directory exists.
-		        output_directory = os.path.dirname(outputref)
-
-		        if not os.path.isdir(output_directory):
-		            self.log.info("Creating directory: " + output_directory)
-		            os.makedirs(output_directory)
-
-		        # Copy the file into the proper location.
-		        self.log.debug("Copying image from: " + absfileref)
-		        shutil.copy(absfileref, outputref)
-		        self.log.info("Copied image file: " + outputref)
-
-		        # Set up the image path so we can replace it.
-		        image_path = os.path.relpath(outputref, self.output_directory)
-            
+                # We aren't ignoring it, so we need to find the absolute
+                # path to it.
+                absfileref = None
+        
+                for media_source in self.args.media_search:
+                    testfileref = os.path.abspath(
+                        os.path.join(media_source, self.relative_dirname, fileref))
+        
+                    if os.path.isfile(testfileref):
+                        absfileref = testfileref
+                        break
+        
+                if not absfileref:
+                    self.log.error("  Cannot find file: " + fileref)
+                    self.log.error("  Search path: " +
+                                   ", ".join(self.args.media_search))
+        
+                    raise Exception(
+                        "Cannot find input image file: "
+                        + os.linesep
+                        + "  " + fileref
+                        + os.linesep
+                        + "Relative path: " + os.linesep
+                        + "  " + self.relative_dirname
+                        + os.linesep
+                        + "Search path: " + os.linesep + "  "
+                        + (os.linesep + "  ").join(self.args.media_search))
+        
+                # Include the file hash to the file to handle duplicate
+                # names that are actually different files. We only use the
+                # first 13 characters because it's "good enough" and prime.
+                file_hash = mfgames_writing.get_file_hash(absfileref)
+                file_hash = file_hash[:13] + "_"
+                
+                if file_hash not in baseref:
+                    outputref = os.path.abspath(
+                        os.path.join(
+                            self.args.media_destination,
+                            file_hash + baseref))
+                else:
+                    outputref = os.path.join(
+                        self.args.media_destination,
+                        baseref)
+        
+                # Make sure the directory exists.
+                output_directory = os.path.dirname(outputref)
+                output_image = os.path.basename(outputref)
+        
+                if not os.path.isdir(output_directory):
+                    self.log.info("Creating directory: " + output_directory)
+                    os.makedirs(output_directory)
+        
+                # Copy the file into the proper location.
+                if absfileref != outputref:
+                    self.log.debug("Copying image from: " + absfileref)
+                    shutil.copy(absfileref, outputref)
+                    self.log.info("Copied image file: " + outputref)
+        
+                # Set up the image path so we can replace it.
+                image_path = output_image
+                    
         # Write out a new element with modifications.
         self.output_stream.write("<");
         self.output_stream.write(name);
@@ -249,7 +260,9 @@ class _DocBookScanner(xml.sax.ContentHandler):
                 value = image_path
 
             # Write out the attribute.
-            self.output_stream.write(" {0}=\"{1}\"".format(key, value))
+            self.output_stream.write(" {0}=\"{1}\"".format(
+                key,
+                xml.sax.saxutils.escape(value)))
 
         # Finish up the element
         self.output_stream.write(">");
