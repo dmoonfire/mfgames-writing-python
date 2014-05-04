@@ -507,7 +507,7 @@ class DocbookAttributionParser(object):
             # versions.
             inner = search.group(2)
             inner_search = re.search(
-                u'\s*(&#8212;|&#x2013;|&#x2014;|-{2,3}|\u2013|\u2014)\s*([^<]+)</simpara>',
+                u'\s*(&#8212;|&#x2013;|&#x2014;|-{2,3}|\u2013|\u2014)\s*(.*?)</simpara>',
                 inner)
             
             # If we found an attribute, use it.
@@ -516,11 +516,16 @@ class DocbookAttributionParser(object):
                 inner = inner.replace(inner_search.group(0), '')
                 inner += "</simpara>"
 
+                # <emphasis/> elements need to be converted into
+                # <citetitle/> to avoid invalid Docbook 5.
+                attr = inner_search.group(2)
+                attr = attr.replace("emphasis>", "citetitle>")
+
                 # Put the attribution before the paragraphs in the
                 # blockquote. These are added with the
                 # 'buf.append(inner)' line below.
                 buf.append('<attribution>')
-                buf.append(inner_search.group(2))
+                buf.append(attr)
                 buf.append('</attribution>')
 
             buf.append(inner)
