@@ -236,10 +236,13 @@ class QueryProcess(mfgames_tools.process.InputFilesProcess):
                 selects = select_root.xpath(select_xpath, namespaces=xml_ns)
 
                 for select in selects:
+                    if select is None:
+                        continue
                     if isinstance(select, basestring):
                         values.append(select)
                     else:
-                        values.append(select.text)
+                        if select.text is not None:
+                            values.append(select.text)
 
             # Once we finish gathering up all the values, we combine
             # them together and add it to the resulting output fields.
