@@ -221,7 +221,7 @@ class TypographicalConvertor(object):
         else:
             # This is either significant or insignificant (e.g.,
             # INDETERMINATE). In this case, we continue shifting back.
-            return is_preceding_significant(tokens, index - 1)
+            return self.is_preceding_significant(tokens, index - 1)
 
     def get_significance(self, token):
         """Gets the significance of the token."""
