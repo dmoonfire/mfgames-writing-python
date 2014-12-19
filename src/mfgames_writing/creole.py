@@ -86,6 +86,12 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         contents = contents.replace('&#8219;', "'")
         contents = contents.replace('&#8216;', "'")
 
+        # If we are parsing fences, then mask the newlines.
+        fence_parser = DocbookFenceParser()
+
+        if (self.args.parse_fences_as_poetry):
+            contents = fence_parser.extract(contents)
+
         # Convert the file into an XML string using the Creole parser.
         log.debug('Converting Creole to XML')
 
@@ -269,6 +275,10 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
             r'<listitem><para>\1</para></listitem>',
             contents)
 
+        # If we are parsing the fence blocks, put them back.
+        if (self.args.parse_fences_as_poetry):
+            contents = fence_parser.parse(contents)
+
         # Write the contents to the output file.
         output = open(output_filename, 'w')
         output.write(contents)
@@ -356,6 +366,10 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
             '--parse-summaries',
             action='store_true',
             help="Parses the summary paragraphs as abstract tags.")
+        parser.add_argument(
+            '--parse-fences-as-poetry',
+            action='store_true',
+            help="Parses the fenced quotes as poetry lines.")
         parser.add_argument(
             '--root-element',
             default='article',
@@ -547,6 +561,120 @@ class DocbookAttributionParser(object):
         # Return the resulting contents combined with the buffer so far.
         buf.append(contents)
         return "".join(buf)
+
+
+class DocbookFenceParser(object):
+    """Parses Creole preformatted fence into poetry."""
+
+    REGEX = r'^(.*?)<pre>\s*FENCE-POETRY-(\d+)\s*</pre>(.*?)$'
+
+    log = logging.getLogger('fence')
+
+    def __init__(self):
+        self.blocks = {}
+
+    def extract(self, contents):
+        """
+        Extracts the preformatted blocks and replaces them with
+        placeholders to avoid the replacement operations that will
+        follow.
+        """
+
+        # Build up a buffer of the new contents.
+        buf = []
+        pre = []
+
+        # Go through the input lines.
+        in_pre = False
+        index = 0
+
+        for line in contents.split("\n"):
+            if line == "{{{":
+                in_pre = True
+                pre = []
+            elif line == "}}}":
+                in_pre = False
+                self.blocks[index] = pre
+                buf.append('FENCE-POETRY-' + str(index))
+                index += 1
+            elif in_pre:
+                pre.append(line)
+                continue
+
+            buf.append(line)
+
+        # Return the resulting contents with the preformats removed.
+        return "\n".join(buf)
+
+    def parse(self, contents):
+        """
+        Replaces the placeholders with the properly formatted paragraph
+        tags.
+        """
+
+        # Build up a buffer of the new contents.
+        buf = []
+
+        # Go through the contents again.
+        search = re.search(
+            self.REGEX,
+            contents,
+            re.MULTILINE)
+
+        while search != None:
+            # Pull out the placeholder and get the preformatted block.
+            before = search.group(1)
+            index = int(search.group(2))
+            after = search.group(3)
+            pre = self.blocks[index]
+
+            # Format the poetry.
+            poem = []
+            poem.append('<poetry>')
+            poem.append('<linegroup>')
+
+            # Go through the input.
+            for line in pre:
+                if line == "":
+                    poem.append("</linegroup>")
+                    poem.append("<linegroup>")
+                else:
+                    poem.append("<line>" + line + "</line>")
+
+            # Finish up the poem.
+            poem.append('</linegroup>')
+            poem.append('</poetry>')
+
+            # Rebuild the line.
+            contents = before + "\n".join(poem) + after
+
+            # Search for the next replacement.
+            search = re.search(
+                self.REGEX,
+                contents,
+                re.MULTILINE)
+
+        in_pre = False
+        index = 0
+
+        for line in contents.split("\n"):
+            
+            if line == "{{{":
+                in_pre = True
+                pre = []
+            elif line == "}}}":
+                in_pre = False
+                self.blocks[index] = pre
+                buf.append('FENCE-POETRY-' + str(index))
+                index += 1
+            elif in_pre:
+                pre.append(line)
+                continue
+
+            buf.append(line)
+
+        # Return the resulting contents with the preformats removed.
+        return "\n".join(buf)
 
 
 class DocbookMetadataParser(object):
