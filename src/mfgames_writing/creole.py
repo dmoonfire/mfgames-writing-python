@@ -392,10 +392,17 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         section_regex = "<section>"
         sections = re.split(section_regex, contents)
         results = [sections[0]]
+
+        # If we have an ID, we prefix the section with that.
+        prefix = "s"
+
+        if self.args.id:
+            prefix = self.args.id + "-s"
     
         # Loop through the resulting section pairs and create the elements.
         for index in range(1, len(sections)):
-            results.append("<section xml:id='s" + format(section_index) + "'>")
+            results.append(
+                "<section xml:id='" + prefix + format(section_index) + "'>")
             results.append(sections[index])
 
             section_index += 1
