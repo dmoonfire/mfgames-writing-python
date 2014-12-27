@@ -156,6 +156,16 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         contents = contents.replace(
             '</strong>',
             '</emphasis>')
+
+        # Fix links.
+        contents = re.sub(
+            r'<a href="(.*?)">',
+            r'<link xlink:href="\1">',
+            contents)
+        contents = re.sub(
+            r'</a>',
+            r'</link>',
+            contents)
         
         # Convert the image tags into the DocBook versions.
         contents = re.sub(
