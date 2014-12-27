@@ -408,6 +408,9 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         Looks for the headings within the contents and coverts them into
         sections that wrap all the lower headings.
         """
+
+        # Set up logging.
+        log = logging.getLogger('wrap')
     
         # If we don't have a heading of the given type, we don't have to
         # do anything for wrapping.
@@ -421,7 +424,7 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
         # heading past it.
         sections = re.split(heading_regex, contents)
         results = [sections[0]]
-    
+
         # Loop through the resulting section pairs and create the elements.
         for index in range(1, len(sections)):
             # Don't bother with odd sections since we'll be looping over
@@ -436,7 +439,6 @@ class CreoleDocbookConvertProcess(mfgames_tools.process.ConvertFilesProcess):
             # If we are at the top-most section (h1), then break out on
             # the second or later one.
             if heading == 'h1' and index > 2:
-                log = logging.getLogger('wrap')
                 log.warning('Skipping top section: ' + title)
                 continue
     
