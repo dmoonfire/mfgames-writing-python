@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+
+import argparse
+import logging
+import mfgames_tools
+import mfgames_writing.markdown.analyze
+import sys
+
+
+reload(sys);
+sys.setdefaultencoding('utf-8')
+
+
+def do_creole_tool(arguments):
+    mfgames_tools.run_tool(
+        'Manipulate, analyze, or convert Markdown files.',
+        arguments,
+        {
+            'analyze' : mfgames_writing.markdown.analyze.MarkdownAnalyzeProcess(),
+        })
+
+
+if __name__ == "__main__":
+    do_creole_tool(sys.argv[1:])

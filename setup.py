@@ -14,8 +14,8 @@ from distutils.core import setup
 setup(
     # Metadata
     name='mfgames-writing',
-    version='0.2.0.0',
-    description='Utilities for manipulating various writing-based formats.',
+    version='0.3.0.0',
+    description='Utilities for manipulating and analyzing various writing-based formats.',
     author='Dylan R. E. Moonfire',
     author_email="contact@mfgames.com",
     url='http://mfgames.com/mfgames-writing',
@@ -39,6 +39,7 @@ setup(
         'src/mfgames-creole',
         'src/mfgames-docbook',
         'src/mfgames-docbook-wordpress',
+        'src/mfgames-markdown',
         'src/mfgames-ncx',
         'src/mfgames-opf',
         ],
@@ -47,6 +48,7 @@ setup(
     packages=[
         "mfgames_writing",
         "mfgames_writing.docbook",
+        "mfgames_writing.markdown",
         "mfgames_writing.ncx",
         "mfgames_writing.opf",
         ],
